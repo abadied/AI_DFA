@@ -123,8 +123,8 @@ def synthesize(S_plus, S_minus):
     Input: the sets of examples and counter-examples
     Output: an NFA"""
     A = build_pta(S_plus).toNFA()
-    secondAlphabet = alphabet(S_minus)
-    for sigma in secondAlphabet:
+    second_alphabet = alphabet(S_minus)
+    for sigma in second_alphabet:
         A.addSigma(sigma)
     U = suffixes(S_plus)
     joined = True

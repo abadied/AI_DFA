@@ -1,5 +1,4 @@
 import numpy as np
-
 import StateGenericFunctions
 
 policy = 0
@@ -10,75 +9,102 @@ ops = 0
 tran_prob_mat = 0
 stepSize = 0
 discount = 0
-initialState = 0
-allStates = 0
+initial_state = 0
+all_states = 0
 
-def initModule(policyParam, stateActionValuesParam, exploreRateParam, nEpisodesParam, opsParam, tran_prob_matParam, stepSizeParam, discountParam, initialStateParam, allStatesParam):
-    """initializes the module's specific parameters"""
-    global policy, stateActionValues, exploreRate, nEpisodes, ops, tran_prob_mat, stepSize, discount, initialState
-    policy = policyParam
-    stateActionValues = stateActionValuesParam
-    exploreRate = exploreRateParam
-    nEpisodes = nEpisodesParam
-    ops = opsParam
-    tran_prob_mat =tran_prob_matParam
-    stepSize = stepSizeParam
-    discount = discountParam
-    initialState = initialStateParam
-    allStates = allStatesParam
 
-def computeReward_QLearning(allStates, state, action):
-    return StateGenericFunctions.computeReward(allStates, state, action)
+def init_module(policy_param, state_action_values_param, explore_rate_param, n_episodes_param, ops_param,
+                tran_prob_mat_param, step_size_param, discount_param, initial_state_param, all_states_param):
+    """
+    initializes the module's specific parameters
+    :param policy_param:
+    :param state_action_values_param:
+    :param explore_rate_param:
+    :param n_episodes_param:
+    :param ops_param:
+    :param tran_prob_mat_param:
+    :param step_size_param:
+    :param discount_param:
+    :param initial_state_param:
+    :param all_states_param:
+    :return:
+    """
+    global policy, stateActionValues, exploreRate, nEpisodes, ops, tran_prob_mat, stepSize, discount, initial_state
+    policy = policy_param
+    stateActionValues = state_action_values_param
+    exploreRate = explore_rate_param
+    nEpisodes = n_episodes_param
+    ops = ops_param
+    tran_prob_mat = tran_prob_mat_param
+    stepSize = step_size_param
+    discount = discount_param
+    initialState = initial_state_param
+    allStates = all_states_param
 
-def chooseAction(state, stateActionValues):
-    "choose an action based on epsilon greedy algorithm"
-    optionalActions = stateActionValues[state.hash].keys()
-    optionalActions = [op for op in optionalActions if not op == "random"]
+
+def compute_reward_q_learning(_all_states, state, action):
+    return StateGenericFunctions.compute_reward(_all_states, state, action)
+
+
+def choose_action(state, state_action_values):
+    """
+    choose an action based on epsilon greedy algorithm
+    :param state:
+    :param state_action_values:
+    :return:
+    """
+    optional_actions = state_action_values[state.hash].keys()
+    optional_actions = [op for op in optional_actions if not op == "random"]
     if np.random.binomial(1, exploreRate) == 1:
         # in this case we need to choose an action from the legal ones
-        return np.random.choice(optionalActions)
+        return np.random.choice(optional_actions)
     else:
         # choose the best action according to values we have at this point from state-action dict
-        bestAction = optionalActions[0]
-        for op in optionalActions:
-            if stateActionValues[state.hash][op] > stateActionValues[state.hash][bestAction]:
-                bestAction = op
-        return bestAction
+        best_action = optional_actions[0]
+        for op in optional_actions:
+            if state_action_values[state.hash][op] > state_action_values[state.hash][best_action]:
+                best_action = op
+        return best_action
 
-def computeBestAction(state):
-    optionalActions = list(stateActionValues[state.hash].keys())
-    bestAction = optionalActions[0]
-    for op in optionalActions:
-        if stateActionValues[state.hash][op] > stateActionValues[state.hash][bestAction]:
-            bestAction = op
-    return bestAction
 
-def qLearning():
-    "Q-Learning main function"
-    global policy, stateActionValues, initialState, nEpisodes
+def compute_best_action(state):
+    optional_actions = list(stateActionValues[state.hash].keys())
+    best_action = optional_actions[0]
+    for op in optional_actions:
+        if stateActionValues[state.hash][op] > stateActionValues[state.hash][best_action]:
+            best_action = op
+    return best_action
+
+
+def q_learning():
+    """
+    Q-Learning main function
+    :return:
+    """
+    global policy, stateActionValues, initial_state, nEpisodes
     print("num of trials ", nEpisodes)
-    for i in range(1,nEpisodes):
-        if i%200 == 0:
+    for i in range(1, nEpisodes):
+        if i % 200 == 0:
             print("trial number ", i)
-        currentState = initialState
-        while not currentState.isEnd():
+        current_state = initial_state
+        while not current_state.is_end():
 
             # choosing an action to make according the current values of state-action pairs (and exploring rate, of course)
-            currentAction = chooseAction(currentState, stateActionValues)
+            current_action = choose_action(current_state, stateActionValues)
 
-            realAction = StateGenericFunctions.computeActualAction(currentAction, currentState)
-            reward = computeReward_QLearning(allStates, currentState, realAction)
-            newState = currentState.nextState(realAction)
+            real_action = StateGenericFunctions.compute_actual_action(current_action, current_state)
+            reward = compute_reward_q_learning(all_states, current_state, real_action)
+            new_state = current_state.next_state(real_action)
 
             # Q-Learning update
-            optionalActions = list(stateActionValues[newState.hash].keys())
-            bestAction = optionalActions[0]
-            for op in optionalActions:
-                if stateActionValues[newState.hash][op] > stateActionValues[newState.hash][bestAction]:
-                    bestAction = op
-            stateActionValues[currentState.hash][currentAction] += stepSize * (
-                reward + discount * stateActionValues[newState.hash][bestAction] -
-                stateActionValues[currentState.hash][currentAction])
-            policy[currentState.hash] = computeBestAction(currentState)
-            currentState = newState
+            optional_actions = list(stateActionValues[new_state.hash].keys())
+            best_action = optional_actions[0]
+            for op in optional_actions:
+                if stateActionValues[new_state.hash][op] > stateActionValues[new_state.hash][best_action]:
+                    best_action = op
+            stateActionValues[current_state.hash][current_action] += stepSize * (
+                reward + discount * stateActionValues[new_state.hash][best_action] -
+                stateActionValues[current_state.hash][current_action])
+            policy[current_state.hash] = compute_best_action(current_state)
+            current_state = new_state
     return policy

@@ -3,27 +3,6 @@ import math
 
 import Dfa
 
-# all the constructed automata have the alphabet {'u','d','r','l','c'}, which relates to the actions
-# ["up", "down", "left", "right", "clean"].
-
-initialState = 0
-maxWordLength = 0
-
-
-def init_automata_learning(initialStateParam, maxWordLengthParam):
-    """initializes the module's specific parameter"""
-    global initialState, maxWordLength
-    initialState = initialStateParam
-    maxWordLength = maxWordLengthParam
-
-
-def compute_reward_non_markovian(state1, state2, action):
-    """this function computes if the non-markovian reward should be get for the given action and states. the current implementation gives the reward for cleaning a 
-        stain right after moving up, i.e. nextState(@state1, "up") = @state2, and @action = "clean" , when @action is performed in @state2 """
-    if action == "clean"  and (not state1 == None) and (not state1.hash == state2.hash) and state1.nextState("up").hash == state2.hash and state2.stateRoom[0] in state2.stateRoom[1]:
-        return True
-    return False
-
 
 def convert_num_to_word(num):
     """
@@ -33,7 +12,7 @@ def convert_num_to_word(num):
     """
     word = ""
     while num:
-        num, value = divmod(num, 6)
+        num, value = divmod(num, 14)
         if value == 0:
             return ""
         elif value == 1:
@@ -46,6 +25,24 @@ def convert_num_to_word(num):
             word = "r" + word
         elif value == 5:
             word = "c" + word
+        elif value == 6:
+            word = "p" + word
+        elif value == 7:
+            word = "k" + word
+        elif value == 8:
+            word = "w" + word
+        elif value == 9:
+            word = "q" + word
+        elif value == 10:
+            word = "e" + word
+        elif value == 11:
+            word = "t" + word
+        elif value == 12:
+            word = "f" + word
+        elif value == 13:
+            word = "s" + word
+        elif value == 14:
+            word = "b" + word
     return word
 
 
@@ -60,41 +57,70 @@ def convert_letter_to_action(letter):
         return "right"
     if letter == "c":
         return "clean"
+    if letter == "p":
+        return "pick"
+    if letter == "k":
+        return "putInBasket"
 
 
-def learn_dfa():
+def convert_letter_to_observation(letter):
+    if letter == "w":
+        return "right_wall"
+    if letter == "q":
+        return "left_wall"
+    if letter == "e":
+        return "upper_wall"
+    if letter == "t":
+        return "downer_wall"
+    if letter == "f":
+        return "fruit"
+    if letter == "s":
+        return "stain"
+    if letter == "b":
+        return "basket"
+
+
+def check_reward_type(reward_type, state):
+    if reward_type == 'fruit':
+        pass
+    elif reward_type == 'clean_stain':
+        pass
+    elif reward_type == 'put_in_basket':
+        pass
+
+
+def learn_dfa(initial_state, max_word_length, reward_type):
     """computes an automaton from sets of words up to specific length. acception of a word is determined by the function 
        computeReward_NonMarkovian. current implementation assumes that there is a single accepting state, and for every
        accepted word, all words which this word is a prefix of them, are also accepted, because the reward was received
        in this sequence of actions/letters"""
-    global initialState, maxWordLength
-    sPlus = set()
-    sMinus = set()
+    s_plus = set()
+    s_minus = set()
     counter = 0
-    numOfWords = 0
+    num_of_words = 0
 
-    while counter < math.pow(6,maxWordLength): # in order to learn all words up to length wordLength, we need to iterate on all numbers up to pow(6,wordLength).
+    while counter < math.pow(6, max_word_length): # in order to learn all words up to length wordLength, we need to iterate on all numbers up to pow(6,wordLength).
                                     # each number corresponds to a 'word' which is a series of actions.
-        formerState = None
-        currentState = initialState
+        former_state = None
+        current_state = initial_state
         word = convert_num_to_word(counter)
         counter += 1
         if word == "" and counter > 1:
             continue
-        numOfWords += 1
-        wordToRead = word
-        nonMarkovianReward = False
+        num_of_words += 1
+        word_to_read = word
+        non_markovian_reward = False
 
-        while not (currentState.isEnd() or wordToRead == ""):  #assuming that the initial state is not an accepting state
-            action = convert_letter_to_action(wordToRead[0:1])
-            wordToRead = wordToRead[1:]
-            nonMarkovianReward = nonMarkovianReward or compute_reward_non_markovian(formerState, currentState, action)
-            formerState = copy.deepcopy(currentState)
-            currentState = currentState.nextState(action)
+        while not (current_state.is_end() or word_to_read == ""):  #assuming that the initial state is not an accepting state
+            action = convert_letter_to_action(word_to_read[0:1])
+            word_to_read = word_to_read[1:]
+            _reward = check_reward_type(reward_type, former_state)
+            former_state = copy.deepcopy(current_state)
+            current_state = current_state.next_state(action)
 
-        if nonMarkovianReward:
-            sPlus.add(word)
+        if non_markovian_reward:
+            s_plus.add(word)
         else:
-            sMinus.add(word)
-    dfa = Dfa.synthesize(sPlus, sMinus)
+            s_minus.add(word)
+    dfa = Dfa.synthesize(s_plus, s_minus)
     return dfa
