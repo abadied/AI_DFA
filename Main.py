@@ -85,6 +85,9 @@ if chosen_algorithm == 'r_max':
 # Automata Learning #
 #####################
 if chosen_algorithm == 'automata_learning':
+    # TODO: add letter value dictionary for action and observation
+    # TODO: add simulations of action observation and learn respective dfas
+    # TODO: convert the state to work with automata states and rewards
     print("Running Automata Learning")
     dfa_dict = {'fruit': None,
                 'stain': None,

@@ -1,158 +1,165 @@
 from FAdo.fa import *
 
 
-def alphabet(S):
-    """Finds all letters in S
-    Input: a set of strings: S
-    Output: the alphabet of S"""
-    result = set()
-    for s in S:
-        for a in s:
-            result.add(a)
-    return result
+class DfaCreator(object):
 
+    @staticmethod
+    def alphabet(sentence):
+        """Finds all letters in S
+        Input: a set of strings: S
+        Output: the alphabet of S"""
+        result = set()
+        for word in sentence:
+            for letter in word:
+                result.add(letter)
+        return result
 
-def prefixes(S):
-    """Finds all prefixes in S
-    Input: a set of strings: S
-    Output: the set of all prefixes of S"""
-    result = set()
-    for s in S:
-        for i in range(len(s) + 1):
-            result.add(s[:i])
-    return result
+    @staticmethod
+    def prefixes(sentence):
+        """Finds all prefixes in S
+        Input: a set of strings: S
+        Output: the set of all prefixes of S"""
+        result = set()
+        for word in sentence:
+            for i in range(len(word) + 1):
+                result.add(word[:i])
+        return result
 
+    @staticmethod
+    def suffixes(sentence):
+        """Finds all suffixes in S
+        Input: a set of strings: S
+        Output: the set of all suffixes of S"""
+        result = set()
+        for word in sentence:
+            for i in range(len(word) + 1):
+                result.add(word[i:])
+        return result
 
-def suffixes(S):
-    """Finds all suffixes in S
-    Input: a set of strings: S
-    Output: the set of all suffixes of S"""
-    result = set()
-    for s in S:
-        for i in range(len(s) + 1):
-            result.add(s[i:])
-    return result
+    @staticmethod
+    def catenate(first_word_set, second_word_set):
+        """Determine the concatenation of two sets of words
+        Input: two sets (or lists) of strings: A, B
+        Output: the set AB"""
 
+        return set(first_word + sec_word for first_word in first_word_set for sec_word in second_word_set)
 
-def catenate(A, B):
-    """Determine the concatenation of two sets of words
-    Input: two sets (or lists) of strings: A, B
-    Output: the set AB"""
+    @staticmethod
+    def ql(sentence):
+        """Returns the list of S in quasi-lexicographic order
+        Input: collection of strings
+        Output: a sorted list"""
 
-    return set(a + b for a in A for b in B)
+        return sorted(sentence, key=lambda word: (len(word), word))
 
+    @staticmethod
+    def build_pta(sentence):
+        """Build a prefix tree acceptor from examples
+        Input: the set of strings, S
+        Output: a DFA representing PTA"""
 
-def ql(S):
-    """Returns the list of S in quasi-lexicographic order
-    Input: collection of strings
-    Output: a sorted list"""
+        det_auotmata = DFA()
+        q = dict()
+        for u in DfaCreator.prefixes(sentence):
+            q[u] = det_auotmata.addState(u)
+        for w in iter(q):
+            u, a = w[:-1], w[-1:]
+            if a != '':
+                det_auotmata.addTransition(q[u], a, q[w])
+            if w in sentence:
+                det_auotmata.addFinal(q[w])
+        det_auotmata.setInitial(q[''])
+        return det_auotmata
 
-    return sorted(S, key=lambda x: (len(x), x))
+    @staticmethod
+    def merge(q1, q2, nfa):
+        """Join two states, i.e., q2 is absorbed by q1
+        Input: q1, q2 state indexes and an NFA A
+        Output: the NFA A updated"""
+        n = len(nfa.States)
+        for q in range(n):
+            if q in nfa.delta:
+                for a in nfa.delta[q]:
+                    if q2 in nfa.delta[q][a]:
+                        nfa.addTransition(q, a, q1)
+            if q2 in nfa.delta:
+                for a in nfa.delta[q2]:
+                    if q in nfa.delta[q2][a]:
+                        nfa.addTransition(q1, a, q)
+        if q2 in nfa.Initial:
+            nfa.addInitial(q1)
+        if q2 in nfa.Final:
+            nfa.addFinal(q1)
+        nfa.deleteStates([q2])
+        return nfa
 
+    @staticmethod
+    def accepts(word, q, nfa):
+        """Verify if in an NFA A, a state q recognizes given word
+        Input: a string w, a state index (int) q, and an NFA A
+        Output: yes or no as Boolean value"""
 
-def build_pta(S):
-    """Build a prefix tree acceptor from examples
-    Input: the set of strings, S
-    Output: a DFA representing PTA"""
+        ilist = nfa.epsilonClosure(q)
+        for letter in word:
+            ilist = nfa.evalSymbol(ilist, letter)
+            if not ilist:
+                return False
+        return not nfa.Final.isdisjoint(ilist)
 
-    A = DFA()
-    q = dict()
-    for u in prefixes(S):
-        q[u] = A.addState(u)
-    for w in iter(q):
-        u, a = w[:-1], w[-1:]
-        if a != '':
-            A.addTransition(q[u], a, q[w])
-        if w in S:
-            A.addFinal(q[w])
-    A.setInitial(q[''])
-    return A
+    @staticmethod
+    def make_candidate_states_list(suffix_set, nfa):
+        """Build the sorted list of pairs of states to merge
+        Input: a set of suffixes, U, and an NFA, A
+        Output: a list of pairs of states, first most promising"""
+        n = len(nfa.States)
+        score = dict()
+        langs = []
+        pairs = []
+        for i in range(n):
+            langs.append(set(u for u in suffix_set if DfaCreator.accepts(u, i, nfa)))
+        for i in range(n-1):
+            for j in range(i+1, n):
+                score[i, j] = len(langs[i] & langs[j])
+                pairs.append((i, j))
+        pairs.sort(key=lambda x: -score[x])
+        return pairs
 
+    @staticmethod
+    def synthesize(set_plus, set_minus):
+        """Infers an NFA consistent with the sample
+        Input: the sets of examples and counter-examples
+        Output: an NFA"""
+        nfa = DfaCreator.build_pta(set_plus).toNFA()
+        second_alphabet = DfaCreator.alphabet(set_minus)
+        for sigma in second_alphabet:
+            nfa.addSigma(sigma)
+        suffix_set = DfaCreator.suffixes(set_plus)
+        joined = True
+        while joined:
+            pairs = DfaCreator.make_candidate_states_list(suffix_set, nfa)
+            joined = False
+            for (p, q) in pairs:
+                dup_nfa = nfa.dup()
+                DfaCreator.merge(p, q, dup_nfa)
+                if not any(dup_nfa.evalWordP(w) for w in set_minus):
+                    nfa = dup_nfa
+                    joined = True
+                    break
 
-def merge(q1, q2, A):
-    """Join two states, i.e., q2 is absorbed by q1
-    Input: q1, q2 state indexes and an NFA A
-    Output: the NFA A updated"""
-    n = len(A.States)
-    for q in range(n):
-        if q in A.delta:
-            for a in A.delta[q]:
-                if q2 in A.delta[q][a]: A.addTransition(q, a, q1)
-        if q2 in A.delta:
-            for a in A.delta[q2]:
-                if q in A.delta[q2][a]: A.addTransition(q1, a, q)
-    if q2 in A.Initial: A.addInitial(q1)
-    if q2 in A.Final: A.addFinal(q1)
-    A.deleteStates([q2])
-    return A
-
-
-def accepts(w, q, A):
-    """Verify if in an NFA A, a state q recognizes given word
-    Input: a string w, a state index (int) q, and an NFA A
-    Output: yes or no as Boolean value"""
-
-    ilist = A.epsilonClosure(q)
-    for c in w:
-        ilist = A.evalSymbol(ilist, c)
-        if not ilist:
-            return False
-    return not A.Final.isdisjoint(ilist)
-
-
-def make_candidate_states_list(U, A):
-    """Build the sorted list of pairs of states to merge
-    Input: a set of suffixes, U, and an NFA, A
-    Output: a list of pairs of states, first most promising"""
-    n = len(A.States)
-    score = dict()
-    langs = []
-    pairs = []
-    for i in range(n):
-        langs.append(set(u for u in U if accepts(u, i, A)))
-    for i in range(n-1):
-        for j in range(i+1, n):
-            score[i, j] = len(langs[i] & langs[j])
-            pairs.append((i, j))
-    pairs.sort(key = lambda x: -score[x])
-    return pairs
-
-
-def synthesize(S_plus, S_minus):
-    """Infers an NFA consistent with the sample
-    Input: the sets of examples and counter-examples
-    Output: an NFA"""
-    A = build_pta(S_plus).toNFA()
-    second_alphabet = alphabet(S_minus)
-    for sigma in second_alphabet:
-        A.addSigma(sigma)
-    U = suffixes(S_plus)
-    joined = True
-    while joined:
-        pairs = make_candidate_states_list(U, A)
-        joined = False
-        for (p, q) in pairs:
-            B = A.dup()
-            merge(p, q, B)
-            if not any(B.evalWordP(w) for w in S_minus):
-                A=B
-                joined = True
-                break
-
-    joined = True
-    while joined:
-        joined = False
-        for p in range(len(A.States)):
-            if not joined:
-                for q in range(len(A.States)):
-                    B = A.dup()
-                    if p != q:
-                        merge(p, q, B)
-                        if not any(B.evalWordP(w) for w in S_minus):
-                            A = B
-                            joined = True
-                            break
-    return A
+        joined = True
+        while joined:
+            joined = False
+            for p in range(len(nfa.States)):
+                if not joined:
+                    for q in range(len(nfa.States)):
+                        dup_nfa = nfa.dup()
+                        if p != q:
+                            DfaCreator.merge(p, q, dup_nfa)
+                            if not any(dup_nfa.evalWordP(w) for w in set_minus):
+                                nfa = dup_nfa
+                                joined = True
+                                break
+        return nfa
 
 # s1 = set(["aa","aba","bba"])
 # s1 = set([])

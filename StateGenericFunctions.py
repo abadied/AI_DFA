@@ -76,6 +76,23 @@ def compute_reward_2(allStates, state, action):
     return 0
 
 
+def compute_reward_by_type(state, action, type):
+    if type == 'end':
+        if not state.is_end() and state.next_state(action).is_end():
+            return Board.FINISHING_CREDIT
+        return -Board.MOVE_COST
+    elif type == 'clean':
+        if action == "clean" and state.stateRoom[0] in state.stateRoom[1]:
+            return Board.CLEANING_CREDIT
+    elif type == 'pick':
+        if action == "pick" and state.stateRoom[0] in state.stateRoom[2]:
+            return Board.PICKING_CREDIT
+    elif type == 'putInBasket':
+        if action == "putInBasket" and state.stateRoom[0] in state.stateRoom[2]:
+            return Board.PUTTING_CREDIT * state.stateRoom[3]
+    return 0
+
+
 def create_initial_policy(all_states):
     """
     initializing a policy that selects a random action for all states (except final ones)
