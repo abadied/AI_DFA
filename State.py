@@ -123,7 +123,8 @@ class State:
         return the state observation with certain probability
         :return: observation string
         """
-        pass
+        obs = 'r'
+        return obs
 
     def print_state(self):
         """

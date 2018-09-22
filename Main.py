@@ -29,7 +29,7 @@ def sample_initial_state():
 
 def sample_action():
     # TODO: test!
-    random_op = random.random(len(OPS))
+    random_op = random.randint(0, len(OPS) - 1)
     return OPS[int(random_op)]
 
 ##############
@@ -37,23 +37,23 @@ def sample_action():
 ##############
 
 
-if chosen_algorithm == 'q_learning':
-     print("Running Q-Learning")
-
-    StateGenericFunctions.opening_print(all_states, room, print_room)
-    policy = StateGenericFunctions.create_initial_policy(all_states)
-    state_value = StateGenericFunctions.create_state_value_dictionary(all_states)
-    n_episodes = 20000
-    step_size = alpha = 0.5
-    explore_rate = epsilon = 0.1
-    state_action_values = dict()
-    for stateKey in all_states.keys():
-        state_action_values[stateKey] = dict()
-        for action in OPS:
-            if all_states[stateKey].legal_op(action):
-                state_action_values[stateKey][action] = 0.0
-    QLearning.init_module(policy, state_action_values, explore_rate, n_episodes, OPS, TRAN_PROB_MAT, step_size, DISCOUNT, initial_state, all_states)
-    policy = QLearning.q_learning()
+# if chosen_algorithm == 'q_learning':
+#     print("Running Q-Learning")
+#
+#     StateGenericFunctions.opening_print(all_states, room, print_room)
+#     policy = StateGenericFunctions.create_initial_policy(all_states)
+#     state_value = StateGenericFunctions.create_state_value_dictionary(all_states)
+#     n_episodes = 20000
+#     step_size = alpha = 0.5
+#     explore_rate = epsilon = 0.1
+#     state_action_values = dict()
+#     for stateKey in all_states.keys():
+#         state_action_values[stateKey] = dict()
+#         for action in OPS:
+#             if all_states[stateKey].legal_op(action):
+#                 state_action_values[stateKey][action] = 0.0
+#     QLearning.init_module(policy, state_action_values, explore_rate, n_episodes, OPS, TRAN_PROB_MAT, step_size, DISCOUNT, initial_state, all_states)
+#     policy = QLearning.q_learning()
 
 
 ####################
@@ -104,6 +104,7 @@ if chosen_algorithm == 'automata_learning':
                                "r": "right",
                                "c": "clean",
                                "p": "pick",
+                               "i": "idle",
                                "k": "putInBasket",
                                "w": "right_wall",
                                "q": "left_wall",
@@ -112,6 +113,7 @@ if chosen_algorithm == 'automata_learning':
                                "f": "fruit",
                                "s": "stain",
                                "b": "basket"}
+    value_letter_dictionary = {letter_value_dictionary[key]: key for key in letter_value_dictionary.keys()}
     simulations_list = []
     NUM_OF_SIMULATIONS = 100
     for i in range(NUM_OF_SIMULATIONS):
@@ -124,10 +126,12 @@ if chosen_algorithm == 'automata_learning':
         goal_state = False
         while iteration_number < MAX_ITERATIONS and not goal_state:
             iteration_number += 1
-            curr_simulation += curr_action
+            curr_simulation += value_letter_dictionary[curr_action]
             curr_state = curr_state.next_state(curr_action)
             curr_simulation += curr_state.get_observation()
             curr_action = sample_action()
+            goal_state = curr_state.is_end()
+        simulations_list.append(curr_simulation)
 
     print("Running Automata Learning")
     dfa_dict = {'fruit': None,
