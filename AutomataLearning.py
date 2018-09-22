@@ -29,34 +29,6 @@ class AutomataLearner(object):
 
     def convert_letter_to_value(self, letter):
         return self.letter_value_dictionary[letter]
-        # if letter == "u":
-        #     return "up"
-        # if letter == "d":
-        #     return "down"
-        # if letter == "l":
-        #     return "left"
-        # if letter == "r":
-        #     return "right"
-        # if letter == "c":
-        #     return "clean"
-        # if letter == "p":
-        #     return "pick"
-        # if letter == "k":
-        #     return "putInBasket"
-        # if letter == "w":
-        #     return "right_wall"
-        # if letter == "q":
-        #     return "left_wall"
-        # if letter == "e":
-        #     return "upper_wall"
-        # if letter == "t":
-        #     return "downer_wall"
-        # if letter == "f":
-        #     return "fruit"
-        # if letter == "s":
-        #     return "stain"
-        # if letter == "b":
-        #     return "basket"
 
     def check_reward_type(self, reward_type, state, action):
         return gf.compute_reward_by_type(state, action, reward_type) > 0

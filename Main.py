@@ -6,7 +6,8 @@ import Show
 import StateGenericFunctions
 import StateWithAuto
 from State import *
-
+import random
+from AutomataLearning import AutomataLearner
 
 chosen_algorithm = "automata_learning"
 initial_state = State()
@@ -21,13 +22,23 @@ def expected_return_for_non_markovian_reward(_all_states, state, _action):
         reward += NONE_MARKOVIAN_REWARD
     return reward
 
+
+def sample_initial_state():
+    return State()
+
+
+def sample_action():
+    # TODO: test!
+    random_op = random.random(len(OPS))
+    return OPS[int(random_op)]
+
 ##############
 # Q-Learning #
 ##############
 
 
 if chosen_algorithm == 'q_learning':
-    print("Running Q-Learning")
+     print("Running Q-Learning")
 
     StateGenericFunctions.opening_print(all_states, room, print_room)
     policy = StateGenericFunctions.create_initial_policy(all_states)
@@ -85,9 +96,39 @@ if chosen_algorithm == 'r_max':
 # Automata Learning #
 #####################
 if chosen_algorithm == 'automata_learning':
-    # TODO: add letter value dictionary for action and observation
     # TODO: add simulations of action observation and learn respective dfas
     # TODO: convert the state to work with automata states and rewards
+    letter_value_dictionary = {"u": "up",
+                               "d": "down",
+                               "l": "left",
+                               "r": "right",
+                               "c": "clean",
+                               "p": "pick",
+                               "k": "putInBasket",
+                               "w": "right_wall",
+                               "q": "left_wall",
+                               "e": "upper_wall",
+                               "t": "downer_wall",
+                               "f": "fruit",
+                               "s": "stain",
+                               "b": "basket"}
+    simulations_list = []
+    NUM_OF_SIMULATIONS = 100
+    for i in range(NUM_OF_SIMULATIONS):
+        curr_simulation = ""
+        initial_state = sample_initial_state()
+        curr_state = initial_state
+        curr_action = sample_action()
+        iteration_number = 0
+        MAX_ITERATIONS = 100
+        goal_state = False
+        while iteration_number < MAX_ITERATIONS and not goal_state:
+            iteration_number += 1
+            curr_simulation += curr_action
+            curr_state = curr_state.next_state(curr_action)
+            curr_simulation += curr_state.get_observation()
+            curr_action = sample_action()
+
     print("Running Automata Learning")
     dfa_dict = {'fruit': None,
                 'stain': None,
@@ -95,7 +136,8 @@ if chosen_algorithm == 'automata_learning':
     StateGenericFunctions.opening_print(all_states, room, print_room)
     max_word_length = 100
     for _key in dfa_dict:
-        dfa_dict[_key] = AutomataLearning.learn_dfa(initial_state, max_word_length, _key)
+        dfa_dict[_key] = AutomataLearner(letter_value_dictionary=letter_value_dictionary, reward_value_dict={})
+        dfa_dict[_key].learn_dfa(initial_state, max_word_length, _key)
     initial_state = StateWithAuto.StateWithAuto(dfa_dict, State(), room)
     allStatesWithAuto = StateGenericFunctions.get_all_states(initial_state, OPS)
     print("number of states after learning the automaton: ", len(allStatesWithAuto))
