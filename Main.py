@@ -110,6 +110,11 @@ if chosen_algorithm == 'automata_learning':
                                "q": "left_wall",
                                "e": "upper_wall",
                                "t": "downer_wall",
+                               "x": "left_up_wall",
+                               "y": "left_down_wall",
+                               "z": "right_up_wall",
+                               "a": "right_down_wall",
+                               "n": "no_walls",
                                "f": "fruit",
                                "s": "stain",
                                "b": "basket"}

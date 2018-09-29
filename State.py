@@ -123,8 +123,25 @@ class State:
         return the state observation with certain probability
         :return: observation string
         """
-        obs = 'r'
-        return obs
+        row_pos = self.state_room[0][0]
+        col_pos = self.state_room[0][1]
+        if row_pos == 0:
+            if col_pos == 0:
+                return 'x'
+            if col_pos == room_width:
+                return 'z'
+            return 'e'
+        elif row_pos == room_height:
+            if col_pos == 0:
+                return 'y'
+            if col_pos == room_width:
+                return 'a'
+            return 't'
+        elif col_pos == 0:
+            return 'q'
+        elif col_pos == room_width:
+            return 'w'
+        return 'n'
 
     def print_state(self):
         """
