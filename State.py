@@ -1,6 +1,6 @@
 from Board import *
 import numpy as np
-
+import random
 
 class State:
 
@@ -149,3 +149,12 @@ class State:
         :return:
         """
         print("State: robot- ", self.state_room[0], ", stains- ", self.state_room[1], ", fruits- ", self.state_room[2])
+
+    def get_possible_rand_action(self):
+        possible_actions = []
+        for op in OPS:
+            if self.legal_op(op):
+                possible_actions.append(op)
+
+        rand = random.randint(0, len(possible_actions) - 1)
+        return possible_actions[rand]

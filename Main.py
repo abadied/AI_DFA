@@ -143,7 +143,7 @@ if chosen_algorithm == 'automata_learning':
                 'stain': None,
                 'put_in_basket': None}
     StateGenericFunctions.opening_print(all_states, room, print_room)
-    max_word_length = 100
+    max_word_length = 10000
     for _key in dfa_dict:
         dfa_dict[_key] = AutomataLearner(letter_value_dictionary=letter_value_dictionary, reward_value_dict={})
         dfa_dict[_key].learn_dfa(initial_state, max_word_length, _key)
