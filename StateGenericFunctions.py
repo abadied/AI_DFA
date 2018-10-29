@@ -1,5 +1,6 @@
 import Board
 import numpy as np
+import math
 
 FINAL_STATES = []
 
@@ -67,29 +68,28 @@ def compute_reward(allStates, state, action):
 def compute_reward_2(allStates, state, action):
     """computes reward for a state&action pair. returns positive reward for every action that makes progress in the game.
     this function computes the reward of an action given that the robot succeeded to make it"""
-    if action == "clean" and state.stateRoom[0] in state.stateRoom[1]:
+    if action == "clean" and state.state_room[0] in state.state_room[1]:
         return Board.CLEANING_CREDIT
-    elif action == "pick" and state.stateRoom[0] in state.stateRoom[2]:
+    elif action == "pick" and state.state_room[0] in state.state_room[2]:
         return Board.PICKING_CREDIT
     elif action == "putInBasket":
-        return Board.PUTTING_CREDIT * state.stateRoom[3]
+        return Board.PUTTING_CREDIT * state.state_room[3]
     return 0
 
 
 def compute_reward_by_type(state, action, type):
-    if type == 'end':
-        if not state.is_end() and state.next_state(action).is_end():
-            return Board.FINISHING_CREDIT
-        return -Board.MOVE_COST
+    if not state.is_end() and state.next_state(action).is_end():
+        return Board.FINISHING_CREDIT
+
     elif type == 'clean':
-        if action == "clean" and state.stateRoom[0] in state.stateRoom[1]:
+        if action == "clean" and state.state_room[0] in state.state_room[1]:
             return Board.CLEANING_CREDIT
     elif type == 'pick':
-        if action == "pick" and state.stateRoom[0] in state.stateRoom[2]:
+        if action == "pick" and state.state_room[0] in state.state_room[2]:
             return Board.PICKING_CREDIT
     elif type == 'putInBasket':
-        if action == "putInBasket" and state.stateRoom[0] in state.stateRoom[2]:
-            return Board.PUTTING_CREDIT * state.stateRoom[3]
+        if action == "putInBasket" and state.state_room[0] in state.state_room[2]:
+            return Board.PUTTING_CREDIT * state.state_room[3]
     return 0
 
 
@@ -192,3 +192,22 @@ def compute_actual_action(action_chosen, current_state):
     if not current_state.legal_op(real_action):
         real_action = "idle"
     return real_action
+
+
+def create_possible_ops_dict(state):
+    possible_ops_dict = {}
+    for _op in state.possible_actions:
+        possible_ops_dict[_op] = 0
+
+    return possible_ops_dict
+
+
+def get_least_common_op(possible_actions_dict: dict):
+    min_val = math.inf
+    op = None
+    for _op in possible_actions_dict.keys():
+        if possible_actions_dict[_op] < min_val:
+            min_val = possible_actions_dict[_op]
+            op = _op
+    possible_actions_dict[op] += 1
+    return op

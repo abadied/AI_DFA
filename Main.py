@@ -8,6 +8,7 @@ import StateWithAuto
 from State import *
 import random
 from AutomataLearning import AutomataLearner
+import Constants
 
 chosen_algorithm = "automata_learning"
 initial_state = State()
@@ -96,57 +97,38 @@ if chosen_algorithm == 'r_max':
 # Automata Learning #
 #####################
 if chosen_algorithm == 'automata_learning':
-    # TODO: add simulations of action observation and learn respective dfas
     # TODO: convert the state to work with automata states and rewards
-    letter_value_dictionary = {"u": "up",
-                               "d": "down",
-                               "l": "left",
-                               "r": "right",
-                               "c": "clean",
-                               "p": "pick",
-                               "i": "idle",
-                               "k": "putInBasket",
-                               "w": "right_wall",
-                               "q": "left_wall",
-                               "e": "upper_wall",
-                               "t": "downer_wall",
-                               "x": "left_up_wall",
-                               "y": "left_down_wall",
-                               "z": "right_up_wall",
-                               "a": "right_down_wall",
-                               "n": "no_walls",
-                               "f": "fruit",
-                               "s": "stain",
-                               "b": "basket"}
-    value_letter_dictionary = {letter_value_dictionary[key]: key for key in letter_value_dictionary.keys()}
-    simulations_list = []
-    NUM_OF_SIMULATIONS = 100
-    for i in range(NUM_OF_SIMULATIONS):
-        curr_simulation = ""
-        initial_state = sample_initial_state()
-        curr_state = initial_state
-        curr_action = sample_action()
-        iteration_number = 0
-        MAX_ITERATIONS = 100
-        goal_state = False
-        while iteration_number < MAX_ITERATIONS and not goal_state:
-            iteration_number += 1
-            curr_simulation += value_letter_dictionary[curr_action]
-            curr_state = curr_state.next_state(curr_action)
-            curr_simulation += curr_state.get_observation()
-            curr_action = sample_action()
-            goal_state = curr_state.is_end()
-        simulations_list.append(curr_simulation)
+    # simulations_list = []
+    # NUM_OF_SIMULATIONS = 100
+    # for i in range(NUM_OF_SIMULATIONS):
+    #     curr_simulation = ""
+    #     initial_state = sample_initial_state()
+    #     curr_state = initial_state
+    #     curr_action = sample_action()
+    #     iteration_number = 0
+    #     MAX_ITERATIONS = 100
+    #     goal_state = False
+    #     while iteration_number < MAX_ITERATIONS and not goal_state:
+    #         iteration_number += 1
+    #         curr_simulation += value_letter_dictionary[curr_action]
+    #         curr_state = curr_state.next_state(curr_action)
+    #         curr_simulation += curr_state.get_observation()
+    #         curr_action = sample_action()
+    #         goal_state = curr_state.is_end()
+    #     simulations_list.append(curr_simulation)
 
     print("Running Automata Learning")
-    dfa_dict = {'fruit': None,
-                'stain': None,
-                'put_in_basket': None}
+    dfa_dict = {'pick': None,
+                'clean': None,
+                'putInBasket': None}
     StateGenericFunctions.opening_print(all_states, room, print_room)
-    max_word_length = 10000
+    max_word_length = 100
+    automata_learner = AutomataLearner(letter_value_dictionary=Constants.letter_value_dictionary, reward_value_dict={})
+
     for _key in dfa_dict:
-        dfa_dict[_key] = AutomataLearner(letter_value_dictionary=letter_value_dictionary, reward_value_dict={})
-        dfa_dict[_key].learn_dfa(initial_state, max_word_length, _key)
+        dfa, words_dict = automata_learner.learn_dfa(initial_state, max_word_length, _key)
+        dfa_dict[_key] = {'dfa': dfa, 'words_dict': words_dict}
+
     initial_state = StateWithAuto.StateWithAuto(dfa_dict, State(), room)
     allStatesWithAuto = StateGenericFunctions.get_all_states(initial_state, OPS)
     print("number of states after learning the automaton: ", len(allStatesWithAuto))

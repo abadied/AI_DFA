@@ -1,15 +1,17 @@
 import random
 import copy
 
-room = []     #do not change here
-room_height = 5 # walls included
-room_width = 5 # walls included
+room = []   # do not change here
+room_height = 5  # walls included
+room_width = 5  # walls included
 # OPS = ["up", "down", "left", "right", "clean", "pick", "putInBasket", "random", "idle"]
 OPS = ["up", "down", "left", "right", "clean", "pick", "putInBasket", "idle"]
 
 ROBOT_POSITION = 2, 1
 BASKET_POSITION = [1, 2]    # don't comment for all algorithms. can be changed.
-# the i-j cell in the transition probability matrix indicates the probability to do action j given that the chosen action is i
+
+# the i-j cell in the transition probability matrix indicates the probability to do action j
+# given that the chosen action is i
 # the matrix is ordered according to the order in OPS
 TRAN_PROB_MAT = [[0.8, 0, 0.1, 0.1, 0, 0, 0, 0, 0],
                  [0, 0.8, 0.1, 0.1, 0, 0, 0, 0, 0],

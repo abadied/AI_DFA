@@ -26,7 +26,7 @@ def init_module(policy_param, all_states_param, ops_param, compute_reward_functi
 def compute_reward_policy_iteration(_all_states, state, action):
     return StateGenericFunctions.compute_reward(_all_states, state, action)
 
-
+# TODO: change to work on automata states
 def policy_iteration():
     """
     Policy Iteration main function

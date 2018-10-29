@@ -35,6 +35,8 @@ class AutomataLearner(object):
         return self.value_letter_dictionary[value]
 
     def check_reward_type(self, reward_type, state, action):
+        # TODO: reward type isnt what it supposed to be - currently contains fruit for example.
+        # TODO:  add check for reward type and possible reward
         return gf.compute_reward_by_type(state, action, reward_type) > 0
 
     def learn_dfa(self, initial_state, max_word_length, reward_type):
@@ -48,18 +50,20 @@ class AutomataLearner(object):
 
         while counter < 1000:
             current_state = initial_state
-
             counter += 1
-
             word = ""
-            current_action_letter = None
-            non_markovian_reward = False
             num_of_steps_counter = 0
+            states_cash_dict = dict()
+            states_cash_dict[current_state.hash] = gf.create_possible_ops_dict(current_state)
+
             while not current_state.is_end() and num_of_steps_counter < max_word_length:
-                action = current_state.get_possible_rand_action()
+                # TODO: create more sophisticated exploration algorithm
+                action = gf.get_least_common_op(states_cash_dict[current_state.hash])
                 current_action_letter = self.convert_value_to_letter(action)
                 non_markovian_reward = self.check_reward_type(reward_type, current_state, action)
                 current_state = current_state.next_state(action)
+                if current_state.hash not in states_cash_dict.keys():
+                    states_cash_dict[current_state.hash] = gf.create_possible_ops_dict(current_state)
                 observation = current_state.get_observation()
                 word += current_action_letter + observation
                 num_of_steps_counter += 1
@@ -69,7 +73,10 @@ class AutomataLearner(object):
                 else:
                     s_minus.add(word)
         dfa = DfaCreator.synthesize(s_plus, s_minus)
-        return dfa
+
+        words_dict = {'s_plus': s_plus,
+                      's_minus': s_minus}
+        return dfa, words_dict
 
     # def learn_dfa(self, initial_state, max_word_length, reward_type):
     #     """computes an automaton from sets of words up to specific length. acception of a word is determined by the function

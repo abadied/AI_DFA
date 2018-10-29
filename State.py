@@ -1,6 +1,7 @@
 from Board import *
 import numpy as np
 import random
+import math
 
 class State:
 
@@ -23,6 +24,10 @@ class State:
         self.state_room.append(carried_fruits)
         self.hash = repr(self.state_room)  # each stateRoom has a string that is it's name (and it's unique)
         self.end = len(self.state_room[1]) == 0 and len(self.state_room[2]) == 0 and self.state_room[3] == 0
+        self.possible_actions = []
+        for op in OPS:
+            if self.legal_op(op):
+                self.possible_actions.append(op)
 
     def is_end(self):
         """
@@ -83,12 +88,16 @@ class State:
         action_index = OPS.index(op)
         sample = np.random.uniform(0.000000001, 1.)
         sum_prob = 0
+        real_action_index = None
         for i in range(len(OPS)):
             sum_prob += TRAN_PROB_MAT[action_index][i]
             if sum_prob > sample:
                 real_action_index = i
                 break
-        actual_op = OPS[real_action_index]
+        if real_action_index:
+            actual_op = OPS[real_action_index]
+        else:
+            raise ValueError("Un valid action index!")
         return self.next_state(actual_op)
 
     def legal_op(self, op):
@@ -151,10 +160,12 @@ class State:
         print("State: robot- ", self.state_room[0], ", stains- ", self.state_room[1], ", fruits- ", self.state_room[2])
 
     def get_possible_rand_action(self):
-        possible_actions = []
-        for op in OPS:
-            if self.legal_op(op):
-                possible_actions.append(op)
+        """
+        returns possible action for curr state
+        :return: action
+        """
 
-        rand = random.randint(0, len(possible_actions) - 1)
-        return possible_actions[rand]
+        rand = random.randint(0, len(self.possible_actions) - 1)
+        return self.possible_actions[rand]
+
+
