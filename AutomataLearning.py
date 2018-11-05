@@ -48,7 +48,7 @@ class AutomataLearner(object):
         s_minus = set()
         counter = 0
 
-        while counter < 1000:
+        while counter < 10000:
             current_state = initial_state
             counter += 1
             word = ""

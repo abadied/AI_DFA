@@ -1,5 +1,5 @@
 import AutomataLearning
-import PolicyIteration
+from PolicyIteration import PolicyIteration
 import QLearning
 import Rmax
 import Show
@@ -96,50 +96,52 @@ if chosen_algorithm == 'r_max':
 #####################
 # Automata Learning #
 #####################
+
+def add_probabilities_to_auto_dict(dfa_dict: dict):
+    for dfa_key in dfa_dict.keys():
+        curr_dict = dfa_dict[dfa_key]
+        dfa = curr_dict['dfa']
+        words_dict = curr_dict['words_dict']
+        s_plus = words_dict['s_plus']
+        s_minus = words_dict['s_minus']
+        for word in s_plus:
+            # TODO: add probabilities to dfa
+            pass
+        for word in s_minus:
+            # TODO: add probabilities to dfa
+            pass
+
+
 if chosen_algorithm == 'automata_learning':
     # TODO: convert the state to work with automata states and rewards
-    # simulations_list = []
-    # NUM_OF_SIMULATIONS = 100
-    # for i in range(NUM_OF_SIMULATIONS):
-    #     curr_simulation = ""
-    #     initial_state = sample_initial_state()
-    #     curr_state = initial_state
-    #     curr_action = sample_action()
-    #     iteration_number = 0
-    #     MAX_ITERATIONS = 100
-    #     goal_state = False
-    #     while iteration_number < MAX_ITERATIONS and not goal_state:
-    #         iteration_number += 1
-    #         curr_simulation += value_letter_dictionary[curr_action]
-    #         curr_state = curr_state.next_state(curr_action)
-    #         curr_simulation += curr_state.get_observation()
-    #         curr_action = sample_action()
-    #         goal_state = curr_state.is_end()
-    #     simulations_list.append(curr_simulation)
 
     print("Running Automata Learning")
     dfa_dict = {'pick': None,
                 'clean': None,
                 'putInBasket': None}
     StateGenericFunctions.opening_print(all_states, room, print_room)
-    max_word_length = 100
+    max_word_length = 1000
     automata_learner = AutomataLearner(letter_value_dictionary=Constants.letter_value_dictionary, reward_value_dict={})
 
     for _key in dfa_dict:
         dfa, words_dict = automata_learner.learn_dfa(initial_state, max_word_length, _key)
-        dfa_dict[_key] = {'dfa': dfa, 'words_dict': words_dict}
+        dfa_dict[_key] = {'dfa': dfa, 'words_dict': words_dict, 'current_state': 0}
 
-    initial_state = StateWithAuto.StateWithAuto(dfa_dict, State(), room)
-    allStatesWithAuto = StateGenericFunctions.get_all_states(initial_state, OPS)
-    print("number of states after learning the automaton: ", len(allStatesWithAuto))
+    add_probabilities_to_auto_dict(dfa_dict)
+    initial_state = '0' * len(list(dfa_dict.keys()))
+    # get number of states from each automata
+    # for all combinations of states initialize policy to move left as below
+    # use policy iteration for the combinations
+    all_auto_states = StateGenericFunctions.get_all_automatas_states(dfa_dict)
     initialPolicy = dict()
-    for stateKey in allStatesWithAuto.keys():
+    for stateKey in all_auto_states:
         initialPolicy[stateKey] = "left"
-    PolicyIteration.init_module(initialPolicy, allStatesWithAuto, OPS, expected_return_for_non_markovian_reward)
-    policy = PolicyIteration.policy_iteration()
-    all_states = allStatesWithAuto
+
+    pi = PolicyIteration(initialPolicy, all_auto_states, OPS, expected_return_for_non_markovian_reward)
+    policy = pi.policy_iteration_with_auto()
 
 
 # Showing the game - used by all algorithms
 if policy is not None:
     Show.show_room(room, policy, all_states, initial_state, OPS, TRAN_PROB_MAT, StateGenericFunctions.FINAL_STATES)
+

@@ -75,6 +75,9 @@ class StateWithAuto:
             return True
         return False
 
+    def get_state_key(self):
+        pass
+
     def print_state(self):
         """
         just for debug"

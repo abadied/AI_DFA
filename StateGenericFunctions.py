@@ -119,6 +119,17 @@ def create_state_value_dictionary(all_states):
         state_value[key] = 0.
     return state_value
 
+def create_state_value_dictionary_auto(all_states):
+    """
+    initial state value - 0 for all states
+    :param all_states:
+    :return:
+    """
+    state_value = dict()
+    for key in all_states:
+        state_value[key] = 0.
+    return state_value
+
 
 def expected_return(all_states, state_key, action, state_value, ops, compute_reward_function):
     """computes the expected discounted return from @allStates[@stateKey] using @action, and according the 
@@ -211,3 +222,8 @@ def get_least_common_op(possible_actions_dict: dict):
             op = _op
     possible_actions_dict[op] += 1
     return op
+
+
+def get_all_automatas_states(dfa_dict: dict):
+    # TODO: implement!
+    raise NotImplemented
