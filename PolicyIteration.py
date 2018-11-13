@@ -9,7 +9,7 @@ computeRewardFunction = 0
 
 class PolicyIteration(object):
 
-    def __init__(self, policy_param, all_states_param, ops_param, compute_reward_function_param):
+    def __init__(self, policy_param, all_states_param, ops_param, dfa_dict):
         """
         initializes the module's specific parameters
         :param policy_param:
@@ -21,7 +21,7 @@ class PolicyIteration(object):
         self.policy = policy_param
         self.all_states = all_states_param
         self.ops = ops_param
-        self.compute_reward_function = compute_reward_function_param
+        self.dfa_dict = dfa_dict
 
     @staticmethod
     def compute_reward_policy_iteration(_all_states, state, action):
@@ -81,7 +81,9 @@ class PolicyIteration(object):
         state_value = StateGenericFunctions.create_state_value_dictionary_auto(all_states)
         while True:  # iterating on policies
             for stateKey in self.all_states:  # applying bellman equation for all states
-                new_state_value[stateKey] = StateGenericFunctions.expected_return(self.all_states, stateKey, self.policy[stateKey], state_value, self.ops, self.compute_reward_function)
+                new_state_value[stateKey] = StateGenericFunctions.expected_return_automatas(self.dfa_dict, stateKey,
+                                                                                            self.policy[stateKey],
+                                                                                            state_value, self.ops)
             sum = 0
             for stateKey in self.all_states:
                 sum += np.abs(new_state_value[stateKey] - state_value[stateKey])
@@ -97,7 +99,7 @@ class PolicyIteration(object):
                     for op in self.ops:
                         if self.all_states[stateKey].legal_op(op):
                             action_returns.append(
-                                StateGenericFunctions.expected_return(self.all_states, stateKey, op, state_value, self.ops, self.compute_reward_function))
+                                StateGenericFunctions.expected_return_automatas(self.dfa_dict, stateKey, op, state_value, self.ops))
                         else:
                             action_returns.append(-float('inf'))
                     best_action = np.argmax(action_returns)

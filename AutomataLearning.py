@@ -35,8 +35,6 @@ class AutomataLearner(object):
         return self.value_letter_dictionary[value]
 
     def check_reward_type(self, reward_type, state, action):
-        # TODO: reward type isnt what it supposed to be - currently contains fruit for example.
-        # TODO:  add check for reward type and possible reward
         return gf.compute_reward_by_type(state, action, reward_type) > 0
 
     def learn_dfa(self, initial_state, max_word_length, reward_type):
@@ -48,7 +46,7 @@ class AutomataLearner(object):
         s_minus = set()
         counter = 0
 
-        while counter < 10000:
+        while counter < 1000:
             current_state = initial_state
             counter += 1
             word = ""

@@ -1,6 +1,7 @@
 from tkinter import *
 import numpy as np
 import copy
+from AutomatasState import AutomatasState
 import time
 
 ROOM = []
@@ -13,6 +14,7 @@ TRAN_PROB_MAT = []
 OBJECT_IN_ROBOT_POSITION = 1
 ALL_STATES = dict()
 CURRENT_STATE = []
+CURRENT_AUTO_STATE = None
 INIT_STATE = []
 POLICY = dict()
 NUM_OF_PICKED_FRUITS = 0
@@ -24,8 +26,10 @@ FIRST_SHOW = True
 FINAL_STATES = ""
 
 
-def show_room(room, policy, all_states, initial_state, operations, tran_prob_mat, final_state):
-    global ROOM, INIT_ROOM, ROOM_HEIGHT, ROOM_WIDTH, OPS, TRAN_PROB_MAT, ALL_STATES, CURRENT_STATE, INIT_STATE, POLICY, c, FIRST_SHOW, FINAL_STATES
+def show_room(room, policy, all_states, initial_state, operations, tran_prob_mat, final_state, dfa_dict):
+    global ROOM, INIT_ROOM, ROOM_HEIGHT, ROOM_WIDTH, OPS, TRAN_PROB_MAT, ALL_STATES, CURRENT_STATE, INIT_STATE, POLICY,\
+        c, FIRST_SHOW, FINAL_STATES, CURRENT_AUTO_STATE
+    CURRENT_AUTO_STATE = AutomatasState(dfa_dict)
     ROOM = room
     INIT_ROOM = copy.deepcopy(room)
     ROOM_HEIGHT = len(room)
@@ -106,9 +110,10 @@ def create_image(image_num, row, col, c):
 
 def restart(event):
     print("Reseting game")
-    global ROOM, INIT_ROOM, CURRENT_STATE, INIT_STATE, OBJECT_IN_ROBOT_POSITION, ROBOT_BAR, BASKET_BAR, NUM_OF_PICKED_FRUITS
+    global ROOM, INIT_ROOM, CURRENT_STATE, INIT_STATE, OBJECT_IN_ROBOT_POSITION, ROBOT_BAR, BASKET_BAR, NUM_OF_PICKED_FRUITS, CURRENT_AUTO_STATE
     ROOM = copy.deepcopy(INIT_ROOM)
     CURRENT_STATE = copy.deepcopy(INIT_STATE)
+    CURRENT_AUTO_STATE = (0, 0, 0)
     OBJECT_IN_ROBOT_POSITION = 1
     ROBOT_BAR = []
     BASKET_BAR = []
@@ -133,10 +138,27 @@ def next_move(event):
     take_next_move()
 
 
+# def take_next_move():
+#     global CURRENT_STATE, POLICY
+#     actionTried = POLICY[CURRENT_STATE.hash]
+#     actionIndex = OPS.index(POLICY[CURRENT_STATE.hash])
+#     sample = np.random.uniform(0.000000001, 1.)
+#     sumProb = 0
+#     for i in range(len(OPS)):
+#         sumProb += TRAN_PROB_MAT[actionIndex][i]
+#         if sumProb > sample:
+#             realActionIndex = i
+#             break
+#     if CURRENT_STATE.legal_op(OPS[realActionIndex]):
+#         execute_action(OPS[realActionIndex])
+#         CURRENT_STATE = CURRENT_STATE.next_state(OPS[realActionIndex])
+#     print("tried to do: ", actionTried, ", action taken: ", OPS[realActionIndex])
+#     return
+
 def take_next_move():
-    global CURRENT_STATE, POLICY
-    actionTried = POLICY[CURRENT_STATE.hash]
-    actionIndex = OPS.index(POLICY[CURRENT_STATE.hash])
+    global CURRENT_STATE, POLICY, CURRENT_AUTO_STATE
+    actionTried = POLICY[CURRENT_AUTO_STATE.get_state_key()]
+    actionIndex = OPS.index(POLICY[CURRENT_AUTO_STATE.get_state_key()])
     sample = np.random.uniform(0.000000001, 1.)
     sumProb = 0
     for i in range(len(OPS)):
@@ -147,9 +169,10 @@ def take_next_move():
     if CURRENT_STATE.legal_op(OPS[realActionIndex]):
         execute_action(OPS[realActionIndex])
         CURRENT_STATE = CURRENT_STATE.next_state(OPS[realActionIndex])
+        observation = CURRENT_STATE.get_observation()
+        CURRENT_AUTO_STATE = CURRENT_AUTO_STATE.next_state(OPS[realActionIndex], observation)
     print("tried to do: ", actionTried, ", action taken: ", OPS[realActionIndex])
     return
-
 
 def play_episode(event):
     global CURRENT_STATE, POLICY, FINAL_STATES

@@ -19,3 +19,5 @@ letter_value_dictionary = {"u": "up",
                            "s": "stain",
                            "b": "basket"}
 value_letter_dictionary = {letter_value_dictionary[key]: key for key in letter_value_dictionary.keys()}
+
+credits = {'pick': 5, 'clean': 10, 'putInBasket': 20}

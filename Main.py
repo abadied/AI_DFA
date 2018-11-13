@@ -101,15 +101,38 @@ def add_probabilities_to_auto_dict(dfa_dict: dict):
     for dfa_key in dfa_dict.keys():
         curr_dict = dfa_dict[dfa_key]
         dfa = curr_dict['dfa']
+        delta_dict = dfa['delta']
         words_dict = curr_dict['words_dict']
         s_plus = words_dict['s_plus']
         s_minus = words_dict['s_minus']
+
         for word in s_plus:
-            # TODO: add probabilities to dfa
-            pass
+            curr_state = 0
+            for letter in word:
+                counter_key  = letter + '_coutner'
+                if counter_key not in delta_dict[curr_state].keys():
+                    delta_dict[curr_state][counter_key] = 0
+                delta_dict[curr_state][counter_key] += 1
+                curr_state = delta_dict[curr_state][letter]
+
         for word in s_minus:
-            # TODO: add probabilities to dfa
-            pass
+            curr_state = 0
+            for letter in word:
+                counter_key = letter + '_coutner'
+                if counter_key not in delta_dict[curr_state].keys():
+                    delta_dict[curr_state][counter_key] = 0
+                delta_dict[curr_state][counter_key] += 1
+                curr_state = delta_dict[curr_state][letter]
+
+        for state in delta_dict.keys():
+            state_sum = 0
+            for letter_key in delta_dict[state].keys():
+                if 'counter' in letter_key:
+                    state_sum += delta_dict[state][letter_key]
+
+            for letter_key in delta_dict[state].keys():
+                if 'counter' in letter_key:
+                    delta_dict[state][letter_key] /= state_sum
 
 
 if chosen_algorithm == 'automata_learning':
@@ -120,17 +143,15 @@ if chosen_algorithm == 'automata_learning':
                 'clean': None,
                 'putInBasket': None}
     StateGenericFunctions.opening_print(all_states, room, print_room)
-    max_word_length = 1000
+    max_word_length = 200
     automata_learner = AutomataLearner(letter_value_dictionary=Constants.letter_value_dictionary, reward_value_dict={})
 
     for _key in dfa_dict:
         dfa, words_dict = automata_learner.learn_dfa(initial_state, max_word_length, _key)
-        dfa_dict[_key] = {'dfa': dfa, 'words_dict': words_dict, 'current_state': 0}
+        dfa_dict[_key] = {'dfa': dfa, 'words_dict': words_dict, 'current_state': 0, 'reward': Constants.credits[_key]}
 
     add_probabilities_to_auto_dict(dfa_dict)
     initial_state = '0' * len(list(dfa_dict.keys()))
-    # get number of states from each automata
-    # for all combinations of states initialize policy to move left as below
     # use policy iteration for the combinations
     all_auto_states = StateGenericFunctions.get_all_automatas_states(dfa_dict)
     initialPolicy = dict()
@@ -143,5 +164,5 @@ if chosen_algorithm == 'automata_learning':
 
 # Showing the game - used by all algorithms
 if policy is not None:
-    Show.show_room(room, policy, all_states, initial_state, OPS, TRAN_PROB_MAT, StateGenericFunctions.FINAL_STATES)
+    Show.show_room(room, policy, all_states, initial_state, OPS, TRAN_PROB_MAT, StateGenericFunctions.FINAL_STATES, dfa_dict)
 

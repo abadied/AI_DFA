@@ -1,7 +1,9 @@
 import Board
 import numpy as np
 import math
-
+from itertools import product
+import Constants
+import copy
 FINAL_STATES = []
 
 
@@ -152,6 +154,43 @@ def expected_return(all_states, state_key, action, state_value, ops, compute_rew
     return returns
 
 
+def expected_return_automatas(dfa_dict, state_key, action, state_value, ops, real_state):
+    """computes the expected discounted return from @allStates[@stateKey] using @action, and according the
+       current @stateValue dictionary"""
+    # initailize total return
+    # TODO: need to find a solution for the observation during the policy iteration, suppose to be simulated without real state
+    returns = 0.0
+    returns -= Board.MOVE_COST
+    new_automatas_states = copy.deepcopy(state_key)
+    for i in range(len(ops)):
+        dfa_counter = 0
+        curr_auto_state = state_key[dfa_counter]
+        real_action = ops[i]
+        legal_op = True
+        reward = 0
+        for dfa_key in dfa_dict.keys():
+            curr_dfa = dfa_dict[dfa_key]
+            if Constants.value_letter_dictionary[real_action] not in curr_dfa['delta'][curr_auto_state].keys():
+                legal_op = False
+        if legal_op:
+            observation = real_state.next_state(real_action).get_observation()
+            for dfa_key in dfa_dict.keys():
+                new_auto_state_action = curr_dfa['dfa'].evalSymbol(curr_auto_state, Constants.value_letter_dictionary[real_action])
+                new_auto_state_observation = curr_dfa['dfa'].evalSymbol(new_auto_state_action, Constants.value_letter_dictionary[observation])
+                new_automatas_states[dfa_counter] = new_auto_state_observation
+                if new_auto_state_action in dfa_dict[dfa_key]['dfa'].Final or new_auto_state_observation in dfa_dict[dfa_key]['dfa'].Final:
+                    reward += curr_dfa[curr_auto_state][Constants.value_letter_dictionary[real_action] + '_coutner'] * dfa_dict[dfa_key]['reward']
+                dfa_counter += 1
+            returns += (reward + Board.DISCOUNT * state_value[new_automatas_states])
+
+        elif not real_state.next_state(real_action).is_end():
+            returns += curr_dfa[curr_auto_state][Constants.value_letter_dictionary[real_action] + '_coutner'] * Board.DISCOUNT * state_value[state_key]
+        else:
+            returns = 100
+
+    return returns
+
+
 def get_prob_sas(state1, state2, action):
     """"given state1 and action, returns the probability to reach state2
         in case that action is 'random' the function returns -1
@@ -225,5 +264,15 @@ def get_least_common_op(possible_actions_dict: dict):
 
 
 def get_all_automatas_states(dfa_dict: dict):
-    # TODO: implement!
-    raise NotImplemented
+    """
+    returns a list of integers from 0 to the highest number represented by the automatas states
+    for example - if there are 3, 2 and 2 state for the respective automatas then a list from 0 to 322 will be the output.
+    :param dfa_dict:
+    :return:
+    """
+    state_lengths = []
+    for dfa_key in dfa_dict:
+        state_lengths.append(list(range(len(dfa_dict[dfa_key]['dfa'].States))))
+
+    all_auto_states = list(product(*state_lengths))
+    return all_auto_states

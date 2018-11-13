@@ -51,9 +51,9 @@ class AutomatasState:
 
         :return:
         """
-        state_key = ""
+        state_key = []
         for dfa_key in self.dfa_dict:
-            state_key += str(self.dfa_dict[dfa_key]['current_state'])
+            state_key.append(self.dfa_dict[dfa_key]['current_state'])
 
         return state_key
 
