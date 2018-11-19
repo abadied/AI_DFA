@@ -166,7 +166,10 @@ def take_next_move():
         if sumProb > sample:
             realActionIndex = i
             break
-    if CURRENT_STATE.legal_op(OPS[realActionIndex]):
+    if CURRENT_STATE.is_end():
+        execute_action(OPS[-1])
+
+    elif CURRENT_STATE.legal_op(OPS[realActionIndex]):
         execute_action(OPS[realActionIndex])
         CURRENT_STATE = CURRENT_STATE.next_state(OPS[realActionIndex])
         observation = CURRENT_STATE.get_observation()

@@ -21,3 +21,7 @@ letter_value_dictionary = {"u": "up",
 value_letter_dictionary = {letter_value_dictionary[key]: key for key in letter_value_dictionary.keys()}
 
 credits = {'pick': 5, 'clean': 10, 'putInBasket': 20}
+OPS = ["up", "down", "left", "right", "clean", "pick", "putInBasket", "idle"]
+OBS = ["right_wall", "left_wall", "upper_wall", "downer_wall", "left_up_wall", "left_down_wall", "right_up_wall",
+       "right_down_wall", "no_walls", "fruit", "stain", "basket", "end"]
+

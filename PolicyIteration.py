@@ -83,28 +83,35 @@ class PolicyIteration(object):
             for stateKey in self.all_states:  # applying bellman equation for all states
                 new_state_value[stateKey] = StateGenericFunctions.expected_return_automatas(self.dfa_dict, stateKey,
                                                                                             self.policy[stateKey],
-                                                                                            state_value, self.ops)
+                                                                                            state_value)
             sum = 0
+            # summarize the improvement in the value function
             for stateKey in self.all_states:
                 sum += np.abs(new_state_value[stateKey] - state_value[stateKey])
+            # update new values
             for key in state_value:
                 state_value[key] = new_state_value[key]
 
+            # update new policy
             if sum < 1e-2: # evaluation converged
                 policy_improvement_ind += 1
                 new_policy = dict()
                 for stateKey in self.all_states:
                     action_returns = []
                     # go through all actions and select the best one
-                    for op in self.ops:
-                        if self.all_states[stateKey].legal_op(op):
-                            action_returns.append(
-                                StateGenericFunctions.expected_return_automatas(self.dfa_dict, stateKey, op, state_value, self.ops))
-                        else:
-                            action_returns.append(-float('inf'))
-                    best_action = np.argmax(action_returns)
-                    new_policy[stateKey] = self.ops[best_action]
-                    policy_changes = 0
+                    possible_ops = StateGenericFunctions.get_states_intersection(stateKey, self.dfa_dict, self.ops)
+                    if len(possible_ops) > 0:
+                        for op in possible_ops:
+                            if self.all_states[stateKey].legal_op(op):
+                                action_returns.append(
+                                    StateGenericFunctions.expected_return_automatas(self.dfa_dict, stateKey, op, state_value))
+                            else:
+                                action_returns.append(-float('inf'))
+                        best_action = np.argmax(action_returns)
+                        new_policy[stateKey] = self.ops[best_action]
+                        policy_changes = 0
+
+                # check how many actions have changed
                 for key in self.policy.keys():
                     if new_policy[key] != self.policy[key]:
                         policy_changes += 1

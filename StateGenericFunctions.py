@@ -121,6 +121,7 @@ def create_state_value_dictionary(all_states):
         state_value[key] = 0.
     return state_value
 
+
 def create_state_value_dictionary_auto(all_states):
     """
     initial state value - 0 for all states
@@ -154,39 +155,36 @@ def expected_return(all_states, state_key, action, state_value, ops, compute_rew
     return returns
 
 
-def expected_return_automatas(dfa_dict, state_key, action, state_value, ops, real_state):
+def expected_return_automatas(dfa_dict, state_key, action, state_value):
     """computes the expected discounted return from @allStates[@stateKey] using @action, and according the
        current @stateValue dictionary"""
     # initailize total return
-    # TODO: need to find a solution for the observation during the policy iteration, suppose to be simulated without real state
     returns = 0.0
     returns -= Board.MOVE_COST
-    new_automatas_states = copy.deepcopy(state_key)
-    for i in range(len(ops)):
+    curr_auto_state = state_key
+    new_auto_state = copy.deepcopy(curr_auto_state)
+    reward = 0
+    # need to find common possible observations and multiply by their probability with the optional score
+    dfa_counter = 0
+    for dfa_key in dfa_dict.keys():
+        curr_dfa = dfa_dict[dfa_key]
+        new_auto_state[dfa_counter] = curr_dfa['dfa'].evalSymbol(curr_auto_state, Constants.value_letter_dictionary[action])
+        dfa_counter += 1
+
+    observations = get_states_intersection(new_auto_state, dfa_dict, Constants.OBS)
+
+    for obs in observations:
         dfa_counter = 0
-        curr_auto_state = state_key[dfa_counter]
-        real_action = ops[i]
-        legal_op = True
-        reward = 0
         for dfa_key in dfa_dict.keys():
             curr_dfa = dfa_dict[dfa_key]
-            if Constants.value_letter_dictionary[real_action] not in curr_dfa['delta'][curr_auto_state].keys():
-                legal_op = False
-        if legal_op:
-            observation = real_state.next_state(real_action).get_observation()
-            for dfa_key in dfa_dict.keys():
-                new_auto_state_action = curr_dfa['dfa'].evalSymbol(curr_auto_state, Constants.value_letter_dictionary[real_action])
-                new_auto_state_observation = curr_dfa['dfa'].evalSymbol(new_auto_state_action, Constants.value_letter_dictionary[observation])
-                new_automatas_states[dfa_counter] = new_auto_state_observation
-                if new_auto_state_action in dfa_dict[dfa_key]['dfa'].Final or new_auto_state_observation in dfa_dict[dfa_key]['dfa'].Final:
-                    reward += curr_dfa[curr_auto_state][Constants.value_letter_dictionary[real_action] + '_coutner'] * dfa_dict[dfa_key]['reward']
-                dfa_counter += 1
-            returns += (reward + Board.DISCOUNT * state_value[new_automatas_states])
+            new_auto_state_observation = curr_dfa['dfa'].evalSymbol(new_auto_state, Constants.value_letter_dictionary[obs])
+            new_auto_state[dfa_counter] = new_auto_state_observation
+            dfa_counter += 1
 
-        elif not real_state.next_state(real_action).is_end():
-            returns += curr_dfa[curr_auto_state][Constants.value_letter_dictionary[real_action] + '_coutner'] * Board.DISCOUNT * state_value[state_key]
-        else:
-            returns = 100
+            if new_auto_state in dfa_dict[dfa_key]['dfa'].Final or new_auto_state_observation in dfa_dict[dfa_key]['dfa'].Final:
+                reward += curr_dfa[curr_auto_state][Constants.value_letter_dictionary[obs] + '_coutner'] * dfa_dict[dfa_key]['reward']
+                dfa_counter += 1
+        returns += (reward + Board.DISCOUNT * state_value[new_auto_state])
 
     return returns
 
@@ -276,3 +274,27 @@ def get_all_automatas_states(dfa_dict: dict):
 
     all_auto_states = list(product(*state_lengths))
     return all_auto_states
+
+
+def get_states_intersection(states_list: list, dfa_dict: dict, options_list: list):
+    """
+    for a given state list, a dfa dictionary and an operation lists this function will return the possible operations
+    for all automatas in the dictionary from current states
+    :param states_list: list of current automatas states
+    :param dfa_dict: dictionary of all automatas
+    :param options_list: list of possible operations/observations
+    :return: set of possible operations/observations
+    """
+    possible_ops = set()
+    for op in options_list:
+        is_possible = True
+        state_idx = 0
+        for dfa_key in dfa_dict.keys():
+            curr_dfa = dfa_dict[dfa_key]
+            curr_auto_state = states_list[state_idx]
+            if Constants.value_letter_dictionary[op] not in list(curr_dfa['delta'][curr_auto_state].keys()):
+                is_possible = False
+        if is_possible:
+            possible_ops.add(op)
+
+    return possible_ops
