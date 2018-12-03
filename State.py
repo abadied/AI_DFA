@@ -134,19 +134,19 @@ class State:
         """
         row_pos = self.state_room[0][0]
         col_pos = self.state_room[0][1]
-        if row_pos == 0:
-            if col_pos == 0:
+        if row_pos == 1:
+            if col_pos == 1:
                 return 'x'
             if col_pos == room_width:
                 return 'z'
             return 'e'
         elif row_pos == room_height:
-            if col_pos == 0:
+            if col_pos == 1:
                 return 'y'
             if col_pos == room_width:
                 return 'a'
             return 't'
-        elif col_pos == 0:
+        elif col_pos == 1:
             return 'q'
         elif col_pos == room_width:
             return 'w'

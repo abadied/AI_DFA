@@ -77,17 +77,17 @@ class PolicyIteration(object):
         :return:
         """
         policy_improvement_ind = 0
-        new_state_value = StateGenericFunctions.create_state_value_dictionary_auto(all_states)
-        state_value = StateGenericFunctions.create_state_value_dictionary_auto(all_states)
+        new_state_value = StateGenericFunctions.create_state_value_dictionary_auto(self.all_states)
+        state_value = StateGenericFunctions.create_state_value_dictionary_auto(self.all_states)
         while True:  # iterating on policies
             for stateKey in self.all_states:  # applying bellman equation for all states
-                new_state_value[stateKey] = StateGenericFunctions.expected_return_automatas(self.dfa_dict, stateKey,
-                                                                                            self.policy[stateKey],
-                                                                                            state_value)
+                new_state_value[str(stateKey)] = StateGenericFunctions.expected_return_automatas(self.dfa_dict, stateKey,
+                                                                                                 self.policy[str(stateKey)],
+                                                                                                 state_value)
             sum = 0
             # summarize the improvement in the value function
             for stateKey in self.all_states:
-                sum += np.abs(new_state_value[stateKey] - state_value[stateKey])
+                sum += np.abs(new_state_value[str(stateKey)] - state_value[str(stateKey)])
             # update new values
             for key in state_value:
                 state_value[key] = new_state_value[key]

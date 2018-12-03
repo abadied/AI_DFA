@@ -101,7 +101,7 @@ def add_probabilities_to_auto_dict(dfa_dict: dict):
     for dfa_key in dfa_dict.keys():
         curr_dict = dfa_dict[dfa_key]
         dfa = curr_dict['dfa']
-        delta_dict = dfa['delta']
+        delta_dict = dfa.delta
         words_dict = curr_dict['words_dict']
         s_plus = words_dict['s_plus']
         s_minus = words_dict['s_minus']
@@ -109,20 +109,28 @@ def add_probabilities_to_auto_dict(dfa_dict: dict):
         for word in s_plus:
             curr_state = 0
             for letter in word:
-                counter_key  = letter + '_coutner'
+                counter_key  = letter + '_counter'
                 if counter_key not in delta_dict[curr_state].keys():
                     delta_dict[curr_state][counter_key] = 0
                 delta_dict[curr_state][counter_key] += 1
-                curr_state = delta_dict[curr_state][letter]
+                curr_state = list(delta_dict[curr_state][letter])[0]
 
         for word in s_minus:
             curr_state = 0
             for letter in word:
-                counter_key = letter + '_coutner'
-                if counter_key not in delta_dict[curr_state].keys():
-                    delta_dict[curr_state][counter_key] = 0
-                delta_dict[curr_state][counter_key] += 1
-                curr_state = delta_dict[curr_state][letter]
+                counter_key = letter + '_counter'
+                try:
+                    if counter_key not in delta_dict[curr_state].keys():
+                        delta_dict[curr_state][counter_key] = 0
+                    delta_dict[curr_state][counter_key] += 1
+                    old_state=curr_state
+                    curr_state = list(delta_dict[curr_state][letter])[0]
+                except Exception as e:
+                    # TODO: check occurrences of letters in curr state key!!!
+                    # print(e)
+                    if type(curr_state) is not int:
+                        print(delta_dict[old_state][letter])
+                    continue
 
         for state in delta_dict.keys():
             state_sum = 0
@@ -140,15 +148,17 @@ if chosen_algorithm == 'automata_learning':
 
     print("Running Automata Learning")
     dfa_dict = {'pick': None,
-                'clean': None,
-                'putInBasket': None}
+                'clean': None,}
+                # 'putInBasket': None}
     StateGenericFunctions.opening_print(all_states, room, print_room)
-    max_word_length = 200
+    max_word_length = 400
     automata_learner = AutomataLearner(letter_value_dictionary=Constants.letter_value_dictionary, reward_value_dict={})
 
     for _key in dfa_dict:
+        print("started learning: " + _key + " automata")
         dfa, words_dict = automata_learner.learn_dfa(initial_state, max_word_length, _key)
         dfa_dict[_key] = {'dfa': dfa, 'words_dict': words_dict, 'current_state': 0, 'reward': Constants.credits[_key]}
+        print("finished learning: " + _key + " automata")
 
     add_probabilities_to_auto_dict(dfa_dict)
     initial_state = '0' * len(list(dfa_dict.keys()))
@@ -156,13 +166,13 @@ if chosen_algorithm == 'automata_learning':
     all_auto_states = StateGenericFunctions.get_all_automatas_states(dfa_dict)
     initialPolicy = dict()
     for stateKey in all_auto_states:
-        initialPolicy[stateKey] = "left"
+        initialPolicy[str(stateKey)] = "left"
 
-    pi = PolicyIteration(initialPolicy, all_auto_states, OPS, expected_return_for_non_markovian_reward)
+    pi = PolicyIteration(initialPolicy, all_auto_states, OPS, dfa_dict)
     policy = pi.policy_iteration_with_auto()
 
 
-# Showing the game - used by all algorithms
-if policy is not None:
-    Show.show_room(room, policy, all_states, initial_state, OPS, TRAN_PROB_MAT, StateGenericFunctions.FINAL_STATES, dfa_dict)
+    # Showing the game - used by all algorithms
+    if policy is not None:
+        Show.show_room(room, policy, all_states, initial_state, OPS, TRAN_PROB_MAT, StateGenericFunctions.FINAL_STATES, dfa_dict)
 

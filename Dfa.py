@@ -135,30 +135,34 @@ class DfaCreator(object):
             nfa.addSigma(sigma)
         suffix_set = DfaCreator.suffixes(set_plus)
         joined = True
-        while joined:
-            pairs = DfaCreator.make_candidate_states_list(suffix_set, nfa)
-            joined = False
-            for (p, q) in pairs:
-                dup_nfa = nfa.dup()
-                DfaCreator.merge(p, q, dup_nfa)
-                if not any(dup_nfa.evalWordP(w) for w in set_minus):
-                    nfa = dup_nfa
-                    joined = True
-                    break
+        # TODO: notice new parameter max states
+        max_states = 500
+        # while joined and len(nfa.States) > max_states:
+        #     pairs = DfaCreator.make_candidate_states_list(suffix_set, nfa)
+        #     joined = False
+        #     for (p, q) in pairs:
+        #         dup_nfa = nfa.dup()
+        #         DfaCreator.merge(p, q, dup_nfa)
+        #         if not any(dup_nfa.evalWordP(w) for w in set_minus):
+        #             nfa = dup_nfa
+        #             joined = True
+        #             break
 
+        # TODO: make it faster or blocked in the number of states merging
         joined = True
-        while joined:
-            joined = False
-            for p in range(len(nfa.States)):
-                if not joined:
-                    for q in range(len(nfa.States)):
-                        dup_nfa = nfa.dup()
-                        if p != q:
-                            DfaCreator.merge(p, q, dup_nfa)
-                            if not any(dup_nfa.evalWordP(w) for w in set_minus):
-                                nfa = dup_nfa
-                                joined = True
-                                break
+        # while joined:
+        #     joined = False
+        #     for p in range(len(nfa.States)):
+        #         if not joined:
+        #             for q in range(len(nfa.States)):
+        #                 dup_nfa = nfa.dup()
+        #                 if p != q:
+        #                     DfaCreator.merge(p, q, dup_nfa)
+        #                     if dup_nfa is not None:
+        #                         if not any(dup_nfa.evalWordP(w) for w in set_minus):
+        #                             nfa = dup_nfa
+        #                             joined = True
+        #                             break
         return nfa
 
 # s1 = set(["aa","aba","bba"])

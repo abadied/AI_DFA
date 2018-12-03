@@ -46,7 +46,7 @@ class AutomataLearner(object):
         s_minus = set()
         counter = 0
 
-        while counter < 1000:
+        while counter < 20:
             current_state = initial_state
             counter += 1
             word = ""
@@ -55,8 +55,8 @@ class AutomataLearner(object):
             states_cash_dict[current_state.hash] = gf.create_possible_ops_dict(current_state)
 
             while not current_state.is_end() and num_of_steps_counter < max_word_length:
-                # TODO: create more sophisticated exploration algorithm
-                action = gf.get_least_common_op(states_cash_dict[current_state.hash])
+                # action = gf.get_least_common_op(states_cash_dict[current_state.hash])
+                action = gf.get_random_op(states_cash_dict[current_state.hash])
                 current_action_letter = self.convert_value_to_letter(action)
                 non_markovian_reward = self.check_reward_type(reward_type, current_state, action)
                 current_state = current_state.next_state(action)

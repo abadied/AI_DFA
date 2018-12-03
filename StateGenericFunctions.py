@@ -4,6 +4,7 @@ import math
 from itertools import product
 import Constants
 import copy
+import random
 FINAL_STATES = []
 
 
@@ -130,7 +131,7 @@ def create_state_value_dictionary_auto(all_states):
     """
     state_value = dict()
     for key in all_states:
-        state_value[key] = 0.
+        state_value[str(key)] = 0.
     return state_value
 
 
@@ -167,8 +168,11 @@ def expected_return_automatas(dfa_dict, state_key, action, state_value):
     # need to find common possible observations and multiply by their probability with the optional score
     dfa_counter = 0
     for dfa_key in dfa_dict.keys():
-        curr_dfa = dfa_dict[dfa_key]
-        new_auto_state[dfa_counter] = curr_dfa['dfa'].evalSymbol(curr_auto_state, Constants.value_letter_dictionary[action])
+        try:
+            new_auto_state[dfa_counter] = list(dfa_dict[dfa_key]['dfa'].evalSymbol([curr_auto_state[dfa_counter]], Constants.value_letter_dictionary[action]))[0]
+        except Exception as e:
+            # TODO: in case the letter doesnt belong to the automata sigma or empty set is returned from evalSymbol- fix
+            continue
         dfa_counter += 1
 
     observations = get_states_intersection(new_auto_state, dfa_dict, Constants.OBS)
@@ -177,14 +181,25 @@ def expected_return_automatas(dfa_dict, state_key, action, state_value):
         dfa_counter = 0
         for dfa_key in dfa_dict.keys():
             curr_dfa = dfa_dict[dfa_key]
-            new_auto_state_observation = curr_dfa['dfa'].evalSymbol(new_auto_state, Constants.value_letter_dictionary[obs])
-            new_auto_state[dfa_counter] = new_auto_state_observation
+            try:
+                new_auto_state_observation = curr_dfa['dfa'].evalSymbol([new_auto_state[dfa_counter]], Constants.value_letter_dictionary[obs])
+                # TODO: might return set bigger then 1
+                new_auto_state_observation = list(new_auto_state_observation)
+                if len(new_auto_state_observation) > 0:
+                    # TODO: not suppose to stay the same state, check!
+                    new_auto_state[dfa_counter] = new_auto_state_observation[0]
+            except NameError as e:
+                # TODO: in case the letter is doesnt belong to the automata sigma - fix
+                pass
+            if new_auto_state[dfa_counter] in dfa_dict[dfa_key]['dfa'].Final or new_auto_state[dfa_counter] in dfa_dict[dfa_key]['dfa'].Final:
+                try:
+                    # TODO: throws key error exceptions on curr_dfa['dfa'].delta[curr_auto_state[dfa_counter]] - fix
+                    reward += curr_dfa['dfa'].delta[curr_auto_state[dfa_counter]][Constants.value_letter_dictionary[obs] + '_counter'] * dfa_dict[dfa_key]['reward']
+                except:
+                    reward += dfa_dict[dfa_key]['reward']
             dfa_counter += 1
 
-            if new_auto_state in dfa_dict[dfa_key]['dfa'].Final or new_auto_state_observation in dfa_dict[dfa_key]['dfa'].Final:
-                reward += curr_dfa[curr_auto_state][Constants.value_letter_dictionary[obs] + '_coutner'] * dfa_dict[dfa_key]['reward']
-                dfa_counter += 1
-        returns += (reward + Board.DISCOUNT * state_value[new_auto_state])
+        returns += (reward + Board.DISCOUNT * state_value[str(new_auto_state)])
 
     return returns
 
@@ -251,6 +266,7 @@ def create_possible_ops_dict(state):
 
 
 def get_least_common_op(possible_actions_dict: dict):
+    # TODO: returns the same action each time for every simulation
     min_val = math.inf
     op = None
     for _op in possible_actions_dict.keys():
@@ -259,6 +275,12 @@ def get_least_common_op(possible_actions_dict: dict):
             op = _op
     possible_actions_dict[op] += 1
     return op
+
+
+def get_random_op(possible_actions_dict: dict):
+    possible_ops_list = list(possible_actions_dict.keys())
+    rand_idx = random.randint(0, len(Constants.OPS) - 1)
+    return Constants.OPS[rand_idx]
 
 
 def get_all_automatas_states(dfa_dict: dict):
@@ -273,6 +295,7 @@ def get_all_automatas_states(dfa_dict: dict):
         state_lengths.append(list(range(len(dfa_dict[dfa_key]['dfa'].States))))
 
     all_auto_states = list(product(*state_lengths))
+    all_auto_states = list(map(lambda x: list(x), all_auto_states))
     return all_auto_states
 
 
@@ -290,10 +313,16 @@ def get_states_intersection(states_list: list, dfa_dict: dict, options_list: lis
         is_possible = True
         state_idx = 0
         for dfa_key in dfa_dict.keys():
-            curr_dfa = dfa_dict[dfa_key]
-            curr_auto_state = states_list[state_idx]
-            if Constants.value_letter_dictionary[op] not in list(curr_dfa['delta'][curr_auto_state].keys()):
+            try:
+                # TODO: figure out why some states_list[state_idx] are empty sets!
+                # TODO: possible ops is always empty or no walls find out why
+                curr_auto_state = states_list[state_idx]
+                keys_list = list(dfa_dict[dfa_key]['dfa'].delta[curr_auto_state].keys())
+                if Constants.value_letter_dictionary[op] not in keys_list:
+                    is_possible = False
+            except Exception as e:
                 is_possible = False
+            state_idx += 1
         if is_possible:
             possible_ops.add(op)
 
