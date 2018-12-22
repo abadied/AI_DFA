@@ -57,7 +57,6 @@ class DfaCreator(object):
         """Build a prefix tree acceptor from examples
         Input: the set of strings, S
         Output: a DFA representing PTA"""
-
         det_auotmata = DFA()
         q = dict()
         for u in DfaCreator.prefixes(sentence):
@@ -67,6 +66,29 @@ class DfaCreator(object):
             if a != '':
                 det_auotmata.addTransition(q[u], a, q[w])
             if w in sentence:
+                det_auotmata.addFinal(q[w])
+        det_auotmata.setInitial(q[''])
+        return det_auotmata
+
+    @staticmethod
+    def build_pta_new(s_plus, s_minus):
+        """Build a prefix tree acceptor from examples
+        Input: the set of strings, S
+        Output: a DFA representing PTA"""
+        det_auotmata = DFA()
+        q = dict()
+        s_plus_prefixes = DfaCreator.prefixes(s_plus)
+        # s_minus_prefixes = DfaCreator.prefixes(s_minus)
+        # difference_s_minus = s_minus_prefixes.difference(s_plus_prefixes)
+        for u in s_plus_prefixes:
+            q[u] = det_auotmata.addState(u)
+        # for u in difference_s_minus:
+        #     q[u] = det_auotmata.addState(u)
+        for w in iter(q):
+            u, a = w[:-1], w[-1:]
+            if a != '':
+                det_auotmata.addTransition(q[u], a, q[w])
+            if w in s_plus:
                 det_auotmata.addFinal(q[w])
         det_auotmata.setInitial(q[''])
         return det_auotmata
@@ -135,36 +157,41 @@ class DfaCreator(object):
             nfa.addSigma(sigma)
         suffix_set = DfaCreator.suffixes(set_plus)
         joined = True
-        # TODO: notice new parameter max states
-        max_states = 500
-        # while joined and len(nfa.States) > max_states:
-        #     pairs = DfaCreator.make_candidate_states_list(suffix_set, nfa)
-        #     joined = False
-        #     for (p, q) in pairs:
-        #         dup_nfa = nfa.dup()
-        #         DfaCreator.merge(p, q, dup_nfa)
-        #         if not any(dup_nfa.evalWordP(w) for w in set_minus):
-        #             nfa = dup_nfa
-        #             joined = True
-        #             break
+        while joined:
+            pairs = DfaCreator.make_candidate_states_list(suffix_set, nfa)
+            joined = False
+            for (p, q) in pairs:
+                dup_nfa = nfa.dup()
+                DfaCreator.merge(p, q, dup_nfa)
+                if not any(dup_nfa.evalWordP(w) for w in set_minus):
+                    nfa = dup_nfa
+                    joined = True
+                    break
 
-        # TODO: make it faster or blocked in the number of states merging
         joined = True
-        # while joined:
-        #     joined = False
-        #     for p in range(len(nfa.States)):
-        #         if not joined:
-        #             for q in range(len(nfa.States)):
-        #                 dup_nfa = nfa.dup()
-        #                 if p != q:
-        #                     DfaCreator.merge(p, q, dup_nfa)
-        #                     if dup_nfa is not None:
-        #                         if not any(dup_nfa.evalWordP(w) for w in set_minus):
-        #                             nfa = dup_nfa
-        #                             joined = True
-        #                             break
+        while joined:
+            joined = False
+            for p in range(len(nfa.States)):
+                if not joined:
+                    for q in range(len(nfa.States)):
+                        dup_nfa = nfa.dup()
+                        if p != q:
+                            DfaCreator.merge(p, q, dup_nfa)
+                            if dup_nfa is not None:
+                                if not any(dup_nfa.evalWordP(w) for w in set_minus):
+                                    nfa = dup_nfa
+                                    joined = True
+                                    break
         return nfa
 
+    @staticmethod
+    def create_and_minimize_dfa(set_plus, set_minus):
+        # TODO: find a way to use s_minus to make to automata better
+        # dfa = DfaCreator.build_pta(set_plus)
+        dfa = DfaCreator.build_pta_new(set_plus, set_minus)
+        # min_dfa = dfa.minimal()
+        min_dfa = dfa
+        return min_dfa
 # s1 = set(["aa","aba","bba"])
 # s1 = set([])
 # print "alphabet: ", alphabet(s1)

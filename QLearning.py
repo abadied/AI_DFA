@@ -1,5 +1,6 @@
 import numpy as np
 import StateGenericFunctions
+import pyqlearning.qlearning.greedy_q_learning
 
 policy = 0
 stateActionValues = 0
@@ -13,98 +14,99 @@ initial_state = 0
 all_states = 0
 
 
-def init_module(policy_param, state_action_values_param, explore_rate_param, n_episodes_param, ops_param,
-                tran_prob_mat_param, step_size_param, discount_param, initial_state_param, all_states_param):
-    """
-    initializes the module's specific parameters
-    :param policy_param:
-    :param state_action_values_param:
-    :param explore_rate_param:
-    :param n_episodes_param:
-    :param ops_param:
-    :param tran_prob_mat_param:
-    :param step_size_param:
-    :param discount_param:
-    :param initial_state_param:
-    :param all_states_param:
-    :return:
-    """
-    global policy, stateActionValues, exploreRate, nEpisodes, ops, tran_prob_mat, stepSize, discount, initial_state
-    policy = policy_param
-    stateActionValues = state_action_values_param
-    exploreRate = explore_rate_param
-    nEpisodes = n_episodes_param
-    ops = ops_param
-    tran_prob_mat = tran_prob_mat_param
-    stepSize = step_size_param
-    discount = discount_param
-    initialState = initial_state_param
-    allStates = all_states_param
+class QLearning(object):
+
+    def __init__(self, policy_param, state_action_values_param, explore_rate_param, n_episodes_param, ops_param,
+                 tran_prob_mat_param, step_size_param, discount_param, initial_state_param, all_states_param):
+        """
+        initializes the module's specific parameters
+        :param policy_param:
+        :param state_action_values_param:
+        :param explore_rate_param:
+        :param n_episodes_param:
+        :param ops_param:
+        :param tran_prob_mat_param:
+        :param step_size_param:
+        :param discount_param:
+        :param initial_state_param:
+        :param all_states_param:
+        :return:
+        """
+        self.policy = policy_param
+        self.stateActionValues = state_action_values_param
+        self.exploreRate = explore_rate_param
+        self.nEpisodes = n_episodes_param
+        self.ops = ops_param
+        self.tran_prob_mat = tran_prob_mat_param
+        self.stepSize = step_size_param
+        self.discount = discount_param
+        self.initialState = initial_state_param
+        self.allStates = all_states_param
 
 
-def compute_reward_q_learning(_all_states, state, action):
-    return StateGenericFunctions.compute_reward(_all_states, state, action)
+    def compute_reward_q_learning(self, type, state, action):
+        return StateGenericFunctions.compute_reward_by_type(state, action, type)
 
 
-def choose_action(state, state_action_values):
-    """
-    choose an action based on epsilon greedy algorithm
-    :param state:
-    :param state_action_values:
-    :return:
-    """
-    optional_actions = state_action_values[state.hash].keys()
-    optional_actions = [op for op in optional_actions if not op == "random"]
-    if np.random.binomial(1, exploreRate) == 1:
-        # in this case we need to choose an action from the legal ones
-        return np.random.choice(optional_actions)
-    else:
-        # choose the best action according to values we have at this point from state-action dict
+    def choose_action(self, state, state_action_values):
+        """
+        choose an action based on epsilon greedy algorithm
+        :param state:
+        :param state_action_values:
+        :return:
+        """
+        optional_actions = state_action_values[state.hash].keys()
+        optional_actions = [op for op in optional_actions if not op == "random"]
+        if np.random.binomial(1, exploreRate) == 1:
+            # in this case we need to choose an action from the legal ones
+            return np.random.choice(optional_actions)
+        else:
+            # choose the best action according to values we have at this point from state-action dict
+            best_action = optional_actions[0]
+            for op in optional_actions:
+                if state_action_values[state.hash][op] > state_action_values[state.hash][best_action]:
+                    best_action = op
+            return best_action
+
+
+    def compute_best_action(self, state):
+        optional_actions = list(stateActionValues[state.hash].keys())
         best_action = optional_actions[0]
         for op in optional_actions:
-            if state_action_values[state.hash][op] > state_action_values[state.hash][best_action]:
+            if stateActionValues[state.hash][op] > stateActionValues[state.hash][best_action]:
                 best_action = op
         return best_action
 
 
-def compute_best_action(state):
-    optional_actions = list(stateActionValues[state.hash].keys())
-    best_action = optional_actions[0]
-    for op in optional_actions:
-        if stateActionValues[state.hash][op] > stateActionValues[state.hash][best_action]:
-            best_action = op
-    return best_action
+    def q_learning(self):
+        """
+        Q-Learning main function
+        :return:
+        """
+        global  stateActionValues
+        print("num of trials ", self.nEpisodes)
+        for i in range(1,  self.nEpisodes):
+            if i % 200 == 0:
+                print("trial number ", i)
+            current_state = initial_state
+            while not current_state.is_end():
 
+                # choosing an action to make according the current values of state-action pairs (and exploring rate, of course)
+                current_action = choose_action(current_state,  self.stateActionValues)
 
-def q_learning():
-    """
-    Q-Learning main function
-    :return:
-    """
-    global policy, stateActionValues, initial_state, nEpisodes
-    print("num of trials ", nEpisodes)
-    for i in range(1, nEpisodes):
-        if i % 200 == 0:
-            print("trial number ", i)
-        current_state = initial_state
-        while not current_state.is_end():
+                real_action = StateGenericFunctions.compute_actual_action(current_action, current_state)
+                reward = compute_reward_q_learning(all_states, current_state, real_action)
+                new_state = current_state.next_state(real_action)
 
-            # choosing an action to make according the current values of state-action pairs (and exploring rate, of course)
-            current_action = choose_action(current_state, stateActionValues)
-
-            real_action = StateGenericFunctions.compute_actual_action(current_action, current_state)
-            reward = compute_reward_q_learning(all_states, current_state, real_action)
-            new_state = current_state.next_state(real_action)
-
-            # Q-Learning update
-            optional_actions = list(stateActionValues[new_state.hash].keys())
-            best_action = optional_actions[0]
-            for op in optional_actions:
-                if stateActionValues[new_state.hash][op] > stateActionValues[new_state.hash][best_action]:
-                    best_action = op
-            stateActionValues[current_state.hash][current_action] += stepSize * (
-                reward + discount * stateActionValues[new_state.hash][best_action] -
-                stateActionValues[current_state.hash][current_action])
-            policy[current_state.hash] = compute_best_action(current_state)
-            current_state = new_state
-    return policy
+                # Q-Learning update
+                optional_actions = list( self.stateActionValues[new_state.hash].keys())
+                best_action = optional_actions[0]
+                for op in optional_actions:
+                    if  self.stateActionValues[new_state.hash][op] > stateActionValues[new_state.hash][best_action]:
+                        best_action = op
+                self.stateActionValues[current_state.hash][current_action] += stepSize * (
+                    reward + discount * self.stateActionValues[new_state.hash][best_action] -
+                    self.stateActionValues[current_state.hash][current_action])
+                policy[current_state.hash] = compute_best_action(current_state)
+                current_state = new_state
+        return policy

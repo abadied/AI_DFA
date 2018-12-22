@@ -113,7 +113,7 @@ def add_probabilities_to_auto_dict(dfa_dict: dict):
                 if counter_key not in delta_dict[curr_state].keys():
                     delta_dict[curr_state][counter_key] = 0
                 delta_dict[curr_state][counter_key] += 1
-                curr_state = list(delta_dict[curr_state][letter])[0]
+                curr_state = delta_dict[curr_state][letter]
 
         for word in s_minus:
             curr_state = 0
@@ -124,7 +124,7 @@ def add_probabilities_to_auto_dict(dfa_dict: dict):
                         delta_dict[curr_state][counter_key] = 0
                     delta_dict[curr_state][counter_key] += 1
                     old_state=curr_state
-                    curr_state = list(delta_dict[curr_state][letter])[0]
+                    curr_state = delta_dict[curr_state][letter]
                 except Exception as e:
                     # TODO: check occurrences of letters in curr state key!!!
                     # print(e)
@@ -151,14 +151,19 @@ if chosen_algorithm == 'automata_learning':
                 'clean': None,}
                 # 'putInBasket': None}
     StateGenericFunctions.opening_print(all_states, room, print_room)
-    max_word_length = 400
+    max_word_length = 100
     automata_learner = AutomataLearner(letter_value_dictionary=Constants.letter_value_dictionary, reward_value_dict={})
 
-    for _key in dfa_dict:
-        print("started learning: " + _key + " automata")
-        dfa, words_dict = automata_learner.learn_dfa(initial_state, max_word_length, _key)
-        dfa_dict[_key] = {'dfa': dfa, 'words_dict': words_dict, 'current_state': 0, 'reward': Constants.credits[_key]}
-        print("finished learning: " + _key + " automata")
+    # for _key in dfa_dict:
+    #     print("started learning: " + _key + " automata")
+    #     dfa, words_dict = automata_learner.learn_dfa(initial_state, max_word_length, _key)
+    #     dfa_dict[_key] = {'dfa': dfa, 'words_dict': words_dict, 'current_state': 0, 'reward': Constants.credits[_key]}
+    #     print("finished learning: " + _key + " automata")
+
+    # TEST NEW LEARNING FUNCTION
+    dfa_dict = automata_learner.learn_all_dfas(initial_state=initial_state,
+                                               max_word_length=max_word_length,
+                                               dfa_dict=dfa_dict)
 
     add_probabilities_to_auto_dict(dfa_dict)
     initial_state = '0' * len(list(dfa_dict.keys()))

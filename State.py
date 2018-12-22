@@ -137,18 +137,18 @@ class State:
         if row_pos == 1:
             if col_pos == 1:
                 return 'x'
-            if col_pos == room_width:
+            if col_pos == room_width - 2:   # -2 because walls are included
                 return 'z'
             return 'e'
-        elif row_pos == room_height:
+        elif row_pos == room_height - 2:    # -2 because walls are included
             if col_pos == 1:
                 return 'y'
-            if col_pos == room_width:
+            if col_pos == room_width - 2:   # -2 because walls are included
                 return 'a'
             return 't'
         elif col_pos == 1:
             return 'q'
-        elif col_pos == room_width:
+        elif col_pos == room_width - 2:     # -2 because walls are included
             return 'w'
         return 'n'
 
