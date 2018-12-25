@@ -81,8 +81,9 @@ def compute_reward_2(allStates, state, action):
 
 
 def compute_reward_by_type(state, action, type):
-    if not state.is_end() and state.next_state(action).is_end():
-        return Board.FINISHING_CREDIT
+    if type == 'end':
+        if not state.is_end() and state.next_state(action).is_end():
+            return Board.FINISHING_CREDIT
 
     elif type == 'clean':
         if action == "clean" and state.state_room[0] in state.state_room[1]:
@@ -168,11 +169,7 @@ def expected_return_automatas(dfa_dict, state_key, action, state_value):
     # need to find common possible observations and multiply by their probability with the optional score
     dfa_counter = 0
     for dfa_key in dfa_dict.keys():
-        try:
-            new_auto_state[dfa_counter] = list(dfa_dict[dfa_key]['dfa'].evalSymbol(curr_auto_state[dfa_counter], Constants.value_letter_dictionary[action]))[0]
-        except Exception as e:
-            # TODO: in case the letter doesnt belong to the automata sigma or empty set is returned from evalSymbol- fix
-            continue
+        new_auto_state[dfa_counter] = list(dfa_dict[dfa_key]['dfa'].evalSymbol(curr_auto_state[dfa_counter], Constants.value_letter_dictionary[action]))[0]
         dfa_counter += 1
 
     observations = get_states_intersection(new_auto_state, dfa_dict, Constants.OBS)
@@ -279,14 +276,18 @@ def get_random_op(possible_actions_dict: dict):
     return Constants.OPS[rand_idx]
 
 
-def get_all_automatas_states(dfa_dict: dict):
+def get_all_automatas_states(dfa_dict: dict, observables: list = list()):
     """
     returns a list of integers from 0 to the highest number represented by the automatas states
     for example - if there are 3, 2 and 2 state for the respective automatas then a list from 0 to 322 will be the output.
     :param dfa_dict:
-    :return:
+    :param observables:
+    :return: list
     """
     state_lengths = []
+    for obs in observables:
+        state_lengths.append(obs)
+
     for dfa_key in dfa_dict:
         state_lengths.append(list(range(len(dfa_dict[dfa_key]['dfa'].States))))
 

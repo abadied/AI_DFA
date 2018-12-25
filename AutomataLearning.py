@@ -5,6 +5,8 @@ from Dfa import DfaCreator
 import StateGenericFunctions as gf
 import Constants
 from GILearner.test import DFACreator
+
+
 class AutomataLearner(object):
 
     def __init__(self, letter_value_dictionary, reward_value_dict):
@@ -84,9 +86,9 @@ class AutomataLearner(object):
            in this sequence of actions/letters"""
         counter = 0
 
-        non_markovian_reward_dict = {}
+        reward_dict = {}
         for _key in dfa_dict:
-            non_markovian_reward_dict[_key] = {'last_value': False, 's_plus': set(), 's_minus': set()}
+            reward_dict[_key] = {'last_value': False, 's_plus': set(), 's_minus': set()}
 
         while counter < 100:
             current_state = initial_state
@@ -101,7 +103,7 @@ class AutomataLearner(object):
                 action = gf.get_random_op(states_cash_dict[current_state.hash])
                 current_action_letter = self.convert_value_to_letter(action)
                 for _key in dfa_dict:
-                    non_markovian_reward_dict[_key]['last_value'] = non_markovian_reward = self.check_reward_type(_key, current_state, action)
+                    reward_dict[_key]['last_value'] = self.check_reward_type(_key, current_state, action)
                 current_state = current_state.next_state(action)
                 if current_state.hash not in states_cash_dict.keys():
                     states_cash_dict[current_state.hash] = gf.create_possible_ops_dict(current_state)
@@ -109,15 +111,15 @@ class AutomataLearner(object):
                 word += current_action_letter + observation
                 num_of_steps_counter += 1
 
-                for _key in non_markovian_reward_dict:
-                    if non_markovian_reward_dict[_key]['last_value']:
-                        non_markovian_reward_dict[_key]['s_plus'].add(word)
+                for _key in reward_dict:
+                    if reward_dict[_key]['last_value']:
+                        reward_dict[_key]['s_plus'].add(word)
                     else:
-                        non_markovian_reward_dict[_key]['s_minus'].add(word)
+                        reward_dict[_key]['s_minus'].add(word)
 
         for _key in dfa_dict:
-            s_plus = non_markovian_reward_dict[_key]['s_plus']
-            s_minus = non_markovian_reward_dict[_key]['s_minus']
+            s_plus = reward_dict[_key]['s_plus']
+            s_minus = reward_dict[_key]['s_minus']
             new_dfa = DFACreator.create_dfa(s_plus, s_minus)
             words_dict = {'s_plus': s_plus,
                           's_minus': s_minus}
