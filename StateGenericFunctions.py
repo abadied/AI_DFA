@@ -157,20 +157,18 @@ def expected_return(all_states, state_key, action, state_value, ops, compute_rew
     return returns
 
 
-def expected_return_automatas(dfa_dict, state_key, action, state_value):
+def expected_return_automatas(auto_state, state_key, action):
     """computes the expected discounted return from @allStates[@stateKey] using @action, and according the
        current @stateValue dictionary"""
     # initailize total return
     returns = 0.0
     returns -= Board.MOVE_COST
     curr_auto_state = state_key
-    new_auto_state = copy.deepcopy(curr_auto_state)
+    new_auto_state = copy.deepcopy(auto_state)
     reward = 0
     # need to find common possible observations and multiply by their probability with the optional score
-    dfa_counter = 0
-    for dfa_key in dfa_dict.keys():
-        new_auto_state[dfa_counter] = list(dfa_dict[dfa_key]['dfa'].evalSymbol(curr_auto_state[dfa_counter], Constants.value_letter_dictionary[action]))[0]
-        dfa_counter += 1
+    new_auto_state[dfa_counter] = list(dfa_dict[dfa_key]['dfa'].evalSymbol(curr_auto_state[dfa_counter], Constants.value_letter_dictionary[action]))[0]
+    dfa_counter += 1
 
     observations = get_states_intersection(new_auto_state, dfa_dict, Constants.OBS)
 
