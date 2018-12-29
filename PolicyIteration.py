@@ -9,7 +9,7 @@ computeRewardFunction = 0
 
 class PolicyIteration(object):
 
-    def __init__(self, policy_param, all_states_param, ops_param, transition_matrix):
+    def __init__(self, policy_param, all_states_param, ops_param, transition_matrix, accepting_states):
         """
         initializes the module's specific parameters
         :param policy_param:
@@ -22,6 +22,7 @@ class PolicyIteration(object):
         self.all_states = all_states_param
         self.ops = ops_param
         self.transition_matrix = transition_matrix
+        self.accepting_states = accepting_states
         self.value_func = None
 
     @staticmethod
@@ -82,9 +83,21 @@ class PolicyIteration(object):
     #     return self.policy
 
     def compute_expected_reward(self, state, action):
-        reeward = 0
-        # TODO: add sum over all states that contain an accepting state in the automata and multiply by the respective probabilities
-        return reeward
+        """
+
+        :param state:
+        :param action:
+        :return:
+        """
+        reward = 0
+        action_tran_matrix = self.transition_matrix[action]
+        for next_state in self.all_states:
+            tran_prob = action_tran_matrix[state][next_state]
+            if tran_prob > 0:
+                for automata_loc in self.accepting_states.keys():
+                    if next_state[automata_loc] in self.accepting_states[automata_loc]['states']:
+                        reward += self.accepting_states[automata_loc]['reward'] * tran_prob
+        return reward
 
     def policy_iteration(self, epsilon=0.01, gamma=0.9):
         """
@@ -95,7 +108,7 @@ class PolicyIteration(object):
         """
         while True:
             change = False
-            self.set_value_function()
+            self.set_value_function(epsilon=epsilon, gamma=gamma)
             for state in self.all_states:
                 possible_states = self.get_possible_states(state)
                 max_change = 0

@@ -71,7 +71,7 @@ def main():
                 # 'clean': None,}
                 # 'putInBasket': None}
     StateGenericFunctions.opening_print(all_states, room, print_room)
-    max_word_length = 300
+    max_word_length = 200
     automata_learner = AutomataLearner(letter_value_dictionary=Constants.letter_value_dictionary, reward_value_dict={})
     initial_state = State()
 
@@ -87,7 +87,11 @@ def main():
     all_auto_states = StateGenericFunctions.get_all_automatas_states(dfa_dict, observable_list)
 
     if Constants.optimization_algorithm == 'policy_iteration':
-        add_probabilities_to_auto_dict(dfa_dict)
+        initial_automata_state = AutomatasState(dfa_dict)
+        transition_matrix_dict = add_probabilities_to_auto_dict(initial_automata_state,
+                                                                dfa_dict['words_dict']['s_minus'],
+                                                                dfa_dict['words_dict']['s_plus'],
+                                                                all_auto_states, Constants.OPS)
 
         # use policy iteration for the combinations
         initial_policy = dict()
@@ -101,8 +105,17 @@ def main():
             for action in OPS:
                 state_action_values[stateKey][action] = 0.0
 
-        policy_iteration = PolicyIteration(policy, all_auto_states, Constants.OPS, dfa_dict)
-        policy = policy_iteration.policy_iteration_with_auto_new()
+        accepting_states_dict = {}
+        num_of_obs = len(observable_list)
+        dfa_keys_list = list(dfa_dict.keys())
+
+        for i in range(num_of_obs, num_of_obs + len(dfa_keys_list)):
+            accepting_states_dict[i]['states'] = dfa_dict[dfa_keys_list[i]]['accepting_states']
+            accepting_states_dict[i]['reward'] = dfa_dict[dfa_keys_list[i]]['reward']
+
+        policy_iteration = PolicyIteration(policy, all_auto_states, Constants.OPS, transition_matrix_dict,
+                                           accepting_states_dict)
+        policy = policy_iteration.policy_iteration()
 
     elif Constants.optimization_algorithm == 'q_learning':
         automata_state = AutomatasState(dfa_dict=dfa_dict)
@@ -116,5 +129,5 @@ def main():
         Show.show_room(room, policy, all_states, initial_state, OPS, TRAN_PROB_MAT, StateGenericFunctions.FINAL_STATES, dfa_dict)
 
 
-if __name__ == 'main':
+if __name__ == '__main__':
     main()

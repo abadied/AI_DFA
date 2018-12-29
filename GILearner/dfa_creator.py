@@ -17,6 +17,12 @@ class DFACreator(object):
 
     @staticmethod
     def create_dfa(set_plus, set_minus):
+        """
+
+        :param set_plus:
+        :param set_minus:
+        :return:
+        """
         e = EDSMSolver()
         for word in set_plus:
             e.add_pos(word)
@@ -26,3 +32,17 @@ class DFACreator(object):
         e.dfa()
         e.alphabet()
         return e
+
+    @staticmethod
+    def get_accepting_states(e):
+        """
+
+        :param e:
+        :return:
+        """
+        accepting_states = []
+        number_of_states = e.state_count()
+        for i in range(number_of_states):
+            if e.is_accept(i):
+                accepting_states.append(i)
+        return accepting_states

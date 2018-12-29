@@ -2,8 +2,8 @@ import random
 import copy
 
 room = []   # do not change here
-room_height = 4  # walls included
-room_width = 4  # walls included
+room_height = 5  # walls included
+room_width = 5  # walls included
 # OPS = ["up", "down", "left", "right", "clean", "pick", "putInBasket", "random", "idle"]
 OPS = ["up", "down", "left", "right", "clean", "pick", "putInBasket", "idle"]
 

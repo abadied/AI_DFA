@@ -4,7 +4,7 @@ import math
 from Dfa import DfaCreator
 import StateGenericFunctions as gf
 import Constants
-from GILearner.test import DFACreator
+from GILearner.dfa_creator import DFACreator
 
 
 class AutomataLearner(object):
@@ -98,7 +98,7 @@ class AutomataLearner(object):
             states_cash_dict = dict()
             states_cash_dict[current_state.hash] = gf.create_possible_ops_dict(current_state)
 
-            while not current_state.is_end() and num_of_steps_counter < max_word_length:
+            while not current_state.is_end() or num_of_steps_counter < max_word_length:
                 # action = gf.get_least_common_op(states_cash_dict[current_state.hash])
                 action = gf.get_random_op(states_cash_dict[current_state.hash])
                 current_action_letter = self.convert_value_to_letter(action)
@@ -121,12 +121,15 @@ class AutomataLearner(object):
             s_plus = reward_dict[_key]['s_plus']
             s_minus = reward_dict[_key]['s_minus']
             new_dfa = DFACreator.create_dfa(s_plus, s_minus)
+
             words_dict = {'s_plus': s_plus,
                           's_minus': s_minus}
             dfa_dict[_key] = {'dfa': new_dfa,
-                              'words_dict': words_dict,
+                              # 'words_dict': words_dict,
                               'current_state': 0,
-                              'reward': Constants.credits[_key]}
+                              'reward': Constants.credits[_key],
+                              'accepting_states': DFACreator.get_accepting_states(new_dfa)}
+            dfa_dict['words_dict'] = words_dict
 
         return dfa_dict
 
