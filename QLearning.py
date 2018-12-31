@@ -31,7 +31,7 @@ class QLearningAlg(object):
 
         :return:
         """
-        Q = np.zeros([len(self.env.all_possible_states), len(self.env.action_space)])
+        self.Q = np.zeros([len(self.env.all_possible_states), len(self.env.action_space)])
         experiment_epsilon = self.epsilon
         for episode in range(self.n_episodes):
             curr_rewards = 0
@@ -43,7 +43,7 @@ class QLearningAlg(object):
                     action = self.env.sample_action_uniformly()  # random action sampled uniformly
                     action_idx = self.env.idx_from_action(action)
                 else:
-                    action_idx = np.argmax(Q[curr_observation_idx, :])  # best action according to q function, Q is a matrix of states on actions
+                    action_idx = np.argmax(self.Q[curr_observation_idx, :])  # best action according to q function, Q is a matrix of states on actions
                     action = self.env.action_from_idx(action_idx)
                 # take an action and update the Q function
                 next_observation, reward, done = self.env.step(action)  # new state from the enviorment
@@ -51,13 +51,13 @@ class QLearningAlg(object):
 
                 if done:
                     target = reward
-                    Q[curr_observation_idx, action_idx] = (1 - self.alpha) * Q[curr_observation_idx, action_idx] + self.alpha * target
+                    self.Q[curr_observation_idx, action_idx] = (1 - self.alpha) * self.Q[curr_observation_idx, action_idx] + self.alpha * target
                     curr_rewards += reward
                     # current_observation = env.reset()
                     break
                 else:
-                    target = reward + self.discount_factor * np.max(Q[next_observation_state_idx, :])
-                    Q[curr_observation_idx, action_idx] = (1 - self.alpha) * Q[curr_observation_idx, action_idx] + self.alpha * target  # update state action field
+                    target = reward + self.discount_factor * np.max(self.Q[next_observation_state_idx, :])
+                    self.Q[curr_observation_idx, action_idx] = (1 - self.alpha) * self.Q[curr_observation_idx, action_idx] + self.alpha * target  # update state action field
                     curr_observation = next_observation
 
                 experiment_epsilon = experiment_epsilon * self.decay_epsilon
@@ -73,6 +73,6 @@ class QLearningAlg(object):
         policy = {}
 
         for i in range(len(self.Q)):
-            policy[self.env.all_possible_states[i]] = self.env.action_space[np.argmax(self.Q[i])]
+            policy[str(self.env.all_possible_states[i])] = self.env.action_space[np.argmax(self.Q[i])]
 
         return policy

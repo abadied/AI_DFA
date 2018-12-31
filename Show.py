@@ -157,8 +157,8 @@ def next_move(event):
 
 def take_next_move():
     global CURRENT_STATE, POLICY, CURRENT_AUTO_STATE
-    actionTried = POLICY[CURRENT_AUTO_STATE.get_state_key()]
-    actionIndex = OPS.index(POLICY[CURRENT_AUTO_STATE.get_state_key()])
+    actionTried = POLICY[str(CURRENT_AUTO_STATE.get_state_key())]
+    actionIndex = OPS.index(POLICY[str(CURRENT_AUTO_STATE.get_state_key())])
     sample = np.random.uniform(0.000000001, 1.)
     sumProb = 0
     for i in range(len(OPS)):
@@ -189,9 +189,9 @@ def play_episode(event):
 
 def execute_action(action):
     if action in ["up", "down", "left", "right"]:
-        move_robot(action, CURRENT_STATE.stateRoom[0][0], CURRENT_STATE.stateRoom[0][1])
+        move_robot(action, CURRENT_STATE.state_room[0][0], CURRENT_STATE.state_room[0][1])
     elif action in ["clean", "pick", "putInBasket"]:
-        non_move_action(CURRENT_STATE.stateRoom[0][0], CURRENT_STATE.stateRoom[0][1], action)
+        non_move_action(CURRENT_STATE.state_room[0][0], CURRENT_STATE.state_room[0][1], action)
 
 
 def move_robot(direction, row, col):
