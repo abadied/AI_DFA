@@ -157,42 +157,42 @@ def expected_return(all_states, state_key, action, state_value, ops, compute_rew
     return returns
 
 
-def expected_return_automatas(auto_state, state_key, action):
-    """computes the expected discounted return from @allStates[@stateKey] using @action, and according the
-       current @stateValue dictionary"""
-    # initailize total return
-    returns = 0.0
-    returns -= Board.MOVE_COST
-    curr_auto_state = state_key
-    new_auto_state = copy.deepcopy(auto_state)
-    reward = 0
-    # need to find common possible observations and multiply by their probability with the optional score
-    new_auto_state[dfa_counter] = list(dfa_dict[dfa_key]['dfa'].evalSymbol(curr_auto_state[dfa_counter], Constants.value_letter_dictionary[action]))[0]
-    dfa_counter += 1
-
-    observations = get_states_intersection(new_auto_state, dfa_dict, Constants.OBS)
-
-    for obs in observations:
-        dfa_counter = 0
-        for dfa_key in dfa_dict.keys():
-            curr_dfa = dfa_dict[dfa_key]
-            try:
-                new_auto_state_observation = curr_dfa['dfa'].evalSymbol(new_auto_state[dfa_counter], Constants.value_letter_dictionary[obs])
-                new_auto_state[dfa_counter] = new_auto_state_observation
-            except NameError as e:
-                # TODO: in case the letter is doesnt belong to the automata sigma - fix
-                pass
-            if new_auto_state[dfa_counter] in dfa_dict[dfa_key]['dfa'].Final or new_auto_state[dfa_counter] in dfa_dict[dfa_key]['dfa'].Final:
-                try:
-                    # TODO: throws key error exceptions on curr_dfa['dfa'].delta[curr_auto_state[dfa_counter]] - fix
-                    reward += curr_dfa['dfa'].delta[curr_auto_state[dfa_counter]][Constants.value_letter_dictionary[obs] + '_counter'] * dfa_dict[dfa_key]['reward']
-                except:
-                    reward += dfa_dict[dfa_key]['reward']
-            dfa_counter += 1
-
-        returns += (reward + Board.DISCOUNT * state_value[str(new_auto_state)])
-
-    return returns
+# def expected_return_automatas(auto_state, state_key, action):
+#     """computes the expected discounted return from @allStates[@stateKey] using @action, and according the
+#        current @stateValue dictionary"""
+#     # initailize total return
+#     returns = 0.0
+#     returns -= Board.MOVE_COST
+#     curr_auto_state = state_key
+#     new_auto_state = copy.deepcopy(auto_state)
+#     reward = 0
+#     # need to find common possible observations and multiply by their probability with the optional score
+#     new_auto_state[dfa_counter] = list(dfa_dict[dfa_key]['dfa'].evalSymbol(curr_auto_state[dfa_counter], Constants.value_letter_dictionary[action]))[0]
+#     dfa_counter += 1
+#
+#     observations = get_states_intersection(new_auto_state, dfa_dict, Constants.OBS)
+#
+#     for obs in observations:
+#         dfa_counter = 0
+#         for dfa_key in dfa_dict.keys():
+#             curr_dfa = dfa_dict[dfa_key]
+#             try:
+#                 new_auto_state_observation = curr_dfa['dfa'].evalSymbol(new_auto_state[dfa_counter], Constants.value_letter_dictionary[obs])
+#                 new_auto_state[dfa_counter] = new_auto_state_observation
+#             except NameError as e:
+#                 # TODO: in case the letter is doesnt belong to the automata sigma - fix
+#                 pass
+#             if new_auto_state[dfa_counter] in dfa_dict[dfa_key]['dfa'].Final or new_auto_state[dfa_counter] in dfa_dict[dfa_key]['dfa'].Final:
+#                 try:
+#                     # TODO: throws key error exceptions on curr_dfa['dfa'].delta[curr_auto_state[dfa_counter]] - fix
+#                     reward += curr_dfa['dfa'].delta[curr_auto_state[dfa_counter]][Constants.value_letter_dictionary[obs] + '_counter'] * dfa_dict[dfa_key]['reward']
+#                 except:
+#                     reward += dfa_dict[dfa_key]['reward']
+#             dfa_counter += 1
+#
+#         returns += (reward + Board.DISCOUNT * state_value[str(new_auto_state)])
+#
+#     return returns
 
 
 def get_prob_sas(state1, state2, action):
@@ -287,7 +287,7 @@ def get_all_automatas_states(dfa_dict: dict, observables: list = list()):
         state_lengths.append(obs)
 
     for dfa_key in dfa_dict:
-        state_lengths.append(list(range(len(dfa_dict[dfa_key]['dfa'].States))))
+        state_lengths.append(list(range(dfa_dict[dfa_key]['dfa'].state_count())))
 
     all_auto_states = list(product(*state_lengths))
     all_auto_states = list(map(lambda x: list(x), all_auto_states))

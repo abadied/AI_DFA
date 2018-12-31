@@ -26,6 +26,7 @@ class Env(object):
         """
         self.real_current_state = self.real_init_state
         self.simulated_current_state.reset()
+        return self.simulated_current_state
 
     def sample_action_uniformly(self):
         """
@@ -46,3 +47,9 @@ class Env(object):
         obs = self.real_current_state.get_observation()
         self.simulated_current_state.next_state(action, obs)
         return self.simulated_current_state, reward, self.real_current_state.is_end()
+
+    def action_from_idx(self, idx):
+        return self.action_space[idx]
+
+    def idx_from_action(self, action):
+        return self.action_space.index(action)

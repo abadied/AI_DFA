@@ -88,7 +88,7 @@ def scattering_fruits():
     #     if room[num1][num2] == 1:
     #         room[num1][num2] = random.randint(3, 5)
     #         i += 1
-    room[3][3] = random.randint(3, 5)
+    # room[3][3] = random.randint(3, 5)
 
 
 init_room()

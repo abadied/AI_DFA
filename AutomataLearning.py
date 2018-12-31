@@ -90,15 +90,15 @@ class AutomataLearner(object):
         for _key in dfa_dict:
             reward_dict[_key] = {'last_value': False, 's_plus': set(), 's_minus': set()}
 
-        while counter < 100:
-            current_state = initial_state
+        while counter < 20:
+            current_state = copy.deepcopy(initial_state)
             counter += 1
             word = ""
             num_of_steps_counter = 0
             states_cash_dict = dict()
             states_cash_dict[current_state.hash] = gf.create_possible_ops_dict(current_state)
 
-            while not current_state.is_end() or num_of_steps_counter < max_word_length:
+            while not current_state.is_end() and num_of_steps_counter < max_word_length:
                 # action = gf.get_least_common_op(states_cash_dict[current_state.hash])
                 action = gf.get_random_op(states_cash_dict[current_state.hash])
                 current_action_letter = self.convert_value_to_letter(action)
@@ -117,21 +117,23 @@ class AutomataLearner(object):
                     else:
                         reward_dict[_key]['s_minus'].add(word)
 
+        complete_dfa_dict = {}
+        words_dict = {}
         for _key in dfa_dict:
             s_plus = reward_dict[_key]['s_plus']
             s_minus = reward_dict[_key]['s_minus']
             new_dfa = DFACreator.create_dfa(s_plus, s_minus)
 
+            # TODO: make addition of sets
             words_dict = {'s_plus': s_plus,
                           's_minus': s_minus}
-            dfa_dict[_key] = {'dfa': new_dfa,
-                              # 'words_dict': words_dict,
-                              'current_state': 0,
-                              'reward': Constants.credits[_key],
-                              'accepting_states': DFACreator.get_accepting_states(new_dfa)}
-            dfa_dict['words_dict'] = words_dict
+            complete_dfa_dict[_key] = {'dfa': new_dfa,
+                                       # 'words_dict': words_dict,
+                                       'current_state': 0,
+                                       'reward': Constants.credits[_key],
+                                       'accepting_states': DFACreator.get_accepting_states(new_dfa)}
 
-        return dfa_dict
+        return complete_dfa_dict, words_dict
 
     # def learn_dfa(self, initial_state, max_word_length, reward_type):
     #     """computes an automaton from sets of words up to specific length. acception of a word is determined by the function

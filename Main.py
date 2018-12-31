@@ -66,19 +66,21 @@ def main():
     episodes = 5000
 
     print("Running Automata Learning")
-    dfa_dict = {'end': None}
-                #'pick': None,
-                # 'clean': None,}
+    dfa_dict = {
+                # 'end': None,
+                # 'pick': None,
+                'clean': None,
                 # 'putInBasket': None}
+                }
     StateGenericFunctions.opening_print(all_states, room, print_room)
-    max_word_length = 200
+    max_word_length = 100
     automata_learner = AutomataLearner(letter_value_dictionary=Constants.letter_value_dictionary, reward_value_dict={})
-    initial_state = State()
+    real_initial_state = State()
 
     # TEST NEW LEARNING FUNCTION
-    dfa_dict = automata_learner.learn_all_dfas(initial_state=initial_state,
-                                               max_word_length=max_word_length,
-                                               dfa_dict=dfa_dict)
+    dfa_dict, words_dict = automata_learner.learn_all_dfas(initial_state=real_initial_state,
+                                                           max_word_length=max_word_length,
+                                                           dfa_dict=dfa_dict)
 
     initial_state = '0' * len(list(dfa_dict.keys()))
 
@@ -89,8 +91,8 @@ def main():
     if Constants.optimization_algorithm == 'policy_iteration':
         initial_automata_state = AutomatasState(dfa_dict)
         transition_matrix_dict = add_probabilities_to_auto_dict(initial_automata_state,
-                                                                dfa_dict['words_dict']['s_minus'],
-                                                                dfa_dict['words_dict']['s_plus'],
+                                                                words_dict['s_minus'],
+                                                                words_dict['s_plus'],
                                                                 all_auto_states, Constants.OPS)
 
         # use policy iteration for the combinations
@@ -119,14 +121,14 @@ def main():
 
     elif Constants.optimization_algorithm == 'q_learning':
         automata_state = AutomatasState(dfa_dict=dfa_dict)
-        env = Env(initial_state, automata_state, Constants.OPS, StateGenericFunctions.compute_reward, all_auto_states)
+        env = Env(real_initial_state, automata_state, Constants.OPS, StateGenericFunctions.compute_reward, all_auto_states)
         q_learning = QLearningAlg(alpha, episodes, epsilon, epsilon_min, decay_epsilon, discount_factor, max_steps, env)
         q_learning.q_learning_v2()
         policy = q_learning.get_policy()
 
     # Showing the game - used by all algorithms
     if policy is not None:
-        Show.show_room(room, policy, all_states, initial_state, OPS, TRAN_PROB_MAT, StateGenericFunctions.FINAL_STATES, dfa_dict)
+        Show.show_room(room, policy, all_states, real_initial_state, OPS, TRAN_PROB_MAT, StateGenericFunctions.FINAL_STATES, dfa_dict)
 
 
 if __name__ == '__main__':
