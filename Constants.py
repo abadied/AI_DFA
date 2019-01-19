@@ -26,4 +26,4 @@ OPS = ["up", "down", "left", "right", "clean", "pick", "putInBasket", "idle"]
 OBS = ["right_wall", "left_wall", "upper_wall", "downer_wall", "left_up_wall", "left_down_wall", "right_up_wall",
        "right_down_wall", "no_walls", "fruit", "stain", "basket", "end"]
 
-optimization_algorithm = 'q_learning'
+optimization_algorithm = 'policy_iteration'

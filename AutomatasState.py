@@ -22,9 +22,10 @@ class AutomatasState:
                          'right_wall': 0,
                          'upper_wall': 0,
                          'downer_wall': 0,
-                         'fruit': 0,
-                         'stain': 0,
-                         'basket': 0}
+                         # 'fruit': 0,
+                         # 'stain': 0,
+                         # 'basket': 0
+                         }
 
     def next_state(self, op, obs):
         "givan a pair state and a legal operation, returns the next pair state"
@@ -40,24 +41,25 @@ class AutomatasState:
             alphabet_mapping = self.dfa_dict[dfa_key]['dfa'].alphabet()
             op_idx = int(alphabet_mapping[Constants.value_letter_dictionary[op]])
             obs_idx = int(alphabet_mapping[obs])
-            self.state_in_auto[dfa_key] = self.dfa_dict[dfa_key]['dfa'].dfa()[self.state_in_auto[dfa_key]][op_idx]
-            self.state_in_auto[dfa_key] = self.dfa_dict[dfa_key]['dfa'].dfa()[self.state_in_auto[dfa_key]][obs_idx]
+            dfa_matrix = self.dfa_dict[dfa_key]['dfa'].dfa()
+            self.state_in_auto[dfa_key] = dfa_matrix[self.state_in_auto[dfa_key]][op_idx]
+            self.state_in_auto[dfa_key] = dfa_matrix[self.state_in_auto[dfa_key]][obs_idx]
 
         def initialize_obs_dict():
             for obs_key in self.curr_obs.keys():
                 self.curr_obs[obs_key] = 0
 
         # update obs
-        if obs == 'f':      # fruit no walls
-            self.curr_obs['fruit'] = 1
+        # if obs == 'f':      # fruit no walls
+        #     self.curr_obs['fruit'] = 1
+        #
+        # elif obs == 's':    # stain no walls
+        #     self.curr_obs['stain'] = 1
+        #
+        # elif obs == 'b':    # basket no walls
+        #     self.curr_obs['basket'] = 1
 
-        elif obs == 's':    # stain no walls
-            self.curr_obs['stain'] = 1
-
-        elif obs == 'b':    # basket no walls
-            self.curr_obs['basket'] = 1
-
-        elif obs == 'w':    # right wall
+        if obs == 'w':    # right wall
             initialize_obs_dict()
             self.curr_obs['right_wall'] = 1
 
@@ -144,9 +146,10 @@ class AutomatasState:
                          'right_wall': 0,
                          'upper_wall': 0,
                          'downer_wall': 0,
-                         'fruit': 0,
-                         'stain': 0,
-                         'basket': 0}
+                         # 'fruit': 0,
+                         # 'stain': 0,
+                         # 'basket': 0
+                         }
 
     def print_state(self):
         """

@@ -32,14 +32,18 @@ def add_probabilities_to_auto_dict(initial_automata_state, s_minus, s_plus, all_
         for word in words:
             initial_automata_state.reset()
             curr_state = initial_automata_state.get_state_key()
-            for i in range(len(word)):
+            i = 0
+            while i < len(word):
                 op_letter = word[i]
                 obs_letter = word[i + 1]
+                i += 2
 
+                curr_state_idx = all_states.index(curr_state)
                 op = Constants.letter_value_dictionary[op_letter]
-                initial_automata_state.next_state(op_letter, obs_letter)
+                initial_automata_state.next_state(op, obs_letter)
                 next_state = initial_automata_state.get_state_key()
-                transition_matrix_dict[op][curr_state][next_state] += 1
+                next_state_idx = all_states.index(next_state)
+                transition_matrix_dict[op][curr_state_idx][next_state_idx] += 1
                 curr_state = next_state
 
     insert_probs(s_plus)
@@ -85,7 +89,9 @@ def main():
     initial_state = '0' * len(list(dfa_dict.keys()))
 
     # one boolean list for each wall , fruit, stain, basket
-    observable_list = [[0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1]]
+    # observable_list = [[0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1]]
+    observable_list = [[0, 1], [0, 1], [0, 1], [0, 1]]
+
     all_auto_states = StateGenericFunctions.get_all_automatas_states(dfa_dict, observable_list)
 
     if Constants.optimization_algorithm == 'policy_iteration':
@@ -102,20 +108,21 @@ def main():
             initial_policy[str(state_key)] = "left"
 
         state_action_values = dict()
-        for stateKey in all_auto_states:
-            state_action_values[stateKey] = dict()
+        for state_key in all_auto_states:
+            state_action_values[str(state_key)] = dict()
             for action in OPS:
-                state_action_values[stateKey][action] = 0.0
+                state_action_values[str(state_key)][action] = 0.0
 
         accepting_states_dict = {}
-        num_of_obs = len(observable_list)
+        # num_of_obs = len(observable_list)
         dfa_keys_list = list(dfa_dict.keys())
 
-        for i in range(num_of_obs, num_of_obs + len(dfa_keys_list)):
+        for i in range(len(dfa_keys_list)):
+            accepting_states_dict[i] = {}
             accepting_states_dict[i]['states'] = dfa_dict[dfa_keys_list[i]]['accepting_states']
             accepting_states_dict[i]['reward'] = dfa_dict[dfa_keys_list[i]]['reward']
 
-        policy_iteration = PolicyIteration(policy, all_auto_states, Constants.OPS, transition_matrix_dict,
+        policy_iteration = PolicyIteration(initial_policy, all_auto_states, Constants.OPS, transition_matrix_dict,
                                            accepting_states_dict)
         policy = policy_iteration.policy_iteration()
 

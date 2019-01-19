@@ -91,8 +91,10 @@ class PolicyIteration(object):
         """
         reward = 0
         action_tran_matrix = self.transition_matrix[action]
+        state_idx = self.all_states.index(state)
         for next_state in self.all_states:
-            tran_prob = action_tran_matrix[state][next_state]
+            next_state_idx = self.all_states.index(next_state)
+            tran_prob = action_tran_matrix[state_idx][next_state_idx]
             if tran_prob > 0:
                 for automata_loc in self.accepting_states.keys():
                     if next_state[automata_loc] in self.accepting_states[automata_loc]['states']:
@@ -113,14 +115,16 @@ class PolicyIteration(object):
                 possible_states = self.get_possible_states(state)
                 max_change = 0
                 max_op = None
+                state_idx = self.all_states.index(state)
                 for op in self.ops:
-                    if op != self.policy[state] and state.legalOp(op):
+                    if op != self.policy[str(state)]:# and state.legalOp(op):
                         action_reward = self.compute_expected_reward(state, op)
                         sigma_param = 0
                         for next_state in possible_states:
-                            sigma_param += self.transition_matrix[op][state][next_state] * self.value_func[next_state]
+                            next_state_idx = self.all_states.index(next_state)
+                            sigma_param += self.transition_matrix[op][state_idx][next_state_idx] * self.value_func[str(next_state)]
                         curr_reward = action_reward + gamma * sigma_param
-                        curr_change = curr_reward - self.value_func[state]
+                        curr_change = curr_reward - self.value_func[str(state)]
                         if curr_change > max_change:
                             max_change = curr_change
                             max_op = op
@@ -144,20 +148,22 @@ class PolicyIteration(object):
         if self.value_func is None:
             value_func = dict()
             for key in self.all_states:
-                value_func[key] = 0
+                value_func[str(key)] = 0
 
         while True:
             changed = False
             for curr_state in self.all_states:
-                action = self.policy[curr_state]
+                action = self.policy[str(curr_state)]
                 sigma_param = 0
                 action_reward = self.compute_expected_reward(curr_state, action)
                 possible_states = self.get_possible_states(curr_state)
+                curr_state_idx = self.all_states.index(curr_state)
                 for next_state in possible_states:
-                    sigma_param += self.transition_matrix[action][curr_state][next_state] * value_func[next_state]
+                    next_state_idx = self.all_states.index(next_state)
+                    sigma_param += self.transition_matrix[action][curr_state_idx][next_state_idx] * value_func[str(next_state)]
                 curr_reward = action_reward + gamma * sigma_param
-                value_func[curr_state] = curr_reward
-                if abs(curr_reward - value_func[curr_state]) >= epsilon:
+                value_func[str(curr_state)] = curr_reward
+                if abs(curr_reward - value_func[str(curr_state)]) >= epsilon:
                     changed = True
             if not changed:
                 break
@@ -169,9 +175,11 @@ class PolicyIteration(object):
         :return:
         """
         possible_states = []
+        state_idx = self.all_states.index(state)
         for tran_mat in self.transition_matrix:
             for next_state in self.all_states:
-                if tran_mat[state][next_state] > 0:
+                next_state_idx = self.all_states.index(next_state)
+                if self.transition_matrix[tran_mat][state_idx][next_state_idx] > 0:
                     possible_states.append(next_state)
         return possible_states
 
