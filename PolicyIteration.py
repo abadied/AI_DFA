@@ -130,8 +130,8 @@ class PolicyIteration(object):
                             max_op = op
 
                 if max_change > 0:
-                    self.policy[state] = max_op
-                    self.value_func[state] += max_change
+                    self.policy[str(state)] = max_op
+                    self.value_func[str(state)] += max_change
                     change = True
 
             if not change:
@@ -146,9 +146,9 @@ class PolicyIteration(object):
         :return: a value function matching the given policy
         """
         if self.value_func is None:
-            value_func = dict()
+            self.value_func = dict()
             for key in self.all_states:
-                value_func[str(key)] = 0
+                self.value_func[str(key)] = 0
 
         while True:
             changed = False
@@ -160,10 +160,10 @@ class PolicyIteration(object):
                 curr_state_idx = self.all_states.index(curr_state)
                 for next_state in possible_states:
                     next_state_idx = self.all_states.index(next_state)
-                    sigma_param += self.transition_matrix[action][curr_state_idx][next_state_idx] * value_func[str(next_state)]
+                    sigma_param += self.transition_matrix[action][curr_state_idx][next_state_idx] * self.value_func[str(next_state)]
                 curr_reward = action_reward + gamma * sigma_param
-                value_func[str(curr_state)] = curr_reward
-                if abs(curr_reward - value_func[str(curr_state)]) >= epsilon:
+                self.value_func[str(curr_state)] = curr_reward
+                if abs(curr_reward - self.value_func[str(curr_state)]) >= epsilon:
                     changed = True
             if not changed:
                 break
