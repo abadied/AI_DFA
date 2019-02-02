@@ -19,9 +19,9 @@ class State:
                     stains.append([i, j])
                 if room[i][j] in [3, 4, 5]:
                     fruits.append([i, j])
-        self.state_room.append(stains)
-        self.state_room.append(fruits)
-        self.state_room.append(carried_fruits)
+        self.state_room.append(stains)          # index 1
+        self.state_room.append(fruits)          # index 2
+        self.state_room.append(carried_fruits)  # index 3
         self.hash = repr(self.state_room)  # each stateRoom has a string that is it's name (and it's unique)
         self.end = len(self.state_room[1]) == 0 and len(self.state_room[2]) == 0 and self.state_room[3] == 0
         self.possible_actions = []
@@ -122,6 +122,36 @@ class State:
         elif op == "right" and room[row_position_of_robot][col_position_of_robot + 1] not in occupied:
             return True
         elif op in ["clean", "pick"]:
+            return True
+        elif op == "putInBasket" and self.state_room[0] == BASKET_POSITION:
+            return True
+        return False
+
+    def new_legal_op(self, op):
+        """
+        returns true iff @op is legal in @self state
+        :param op:
+        :return:
+        """
+        if op == "idle" and self.is_end():
+            return True
+
+        if self.is_end():
+            return False
+        row_position_of_robot = self.state_room[0][0]
+        col_position_of_robot = self.state_room[0][1]
+        occupied = [0, 7, 10]  # these numbers represent wall, basket, cabinet and man appropriately
+        if op == "up" and room[row_position_of_robot - 1][col_position_of_robot] not in occupied:
+            return True
+        elif op == "down" and room[row_position_of_robot + 1][col_position_of_robot] not in occupied:
+            return True
+        elif op == "left" and room[row_position_of_robot][col_position_of_robot - 1] not in occupied:
+            return True
+        elif op == "right" and room[row_position_of_robot][col_position_of_robot + 1] not in occupied:
+            return True
+        elif op == "clean" and [row_position_of_robot, col_position_of_robot] in self.state_room[1]:
+            return True
+        elif op == "pick" and [row_position_of_robot, col_position_of_robot] in self.state_room[2]:
             return True
         elif op == "putInBasket" and self.state_room[0] == BASKET_POSITION:
             return True

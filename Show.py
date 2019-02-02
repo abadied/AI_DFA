@@ -19,7 +19,7 @@ INIT_STATE = []
 POLICY = dict()
 NUM_OF_PICKED_FRUITS = 0
 root = Tk()
-root.title("Brafman's Project")
+root.title("POMDP REDUCTION")
 ROBOT_BAR = []
 BASKET_BAR = []
 FIRST_SHOW = True
@@ -176,6 +176,7 @@ def take_next_move():
         CURRENT_AUTO_STATE.next_state(OPS[realActionIndex], observation)
     print("tried to do: ", actionTried, ", action taken: ", OPS[realActionIndex])
     return
+
 
 def play_episode(event):
     global CURRENT_STATE, POLICY, FINAL_STATES

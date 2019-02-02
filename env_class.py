@@ -33,7 +33,12 @@ class Env(object):
 
         :return:
         """
-        idx = int(np.random.uniform(0, len(self.action_space) - 1, 1))
+        idx = None
+        while idx is None:
+            possible_idx = int(np.random.uniform(0, len(self.action_space) - 1, 1))
+            if self.real_current_state.new_legal_op(self.action_space[possible_idx]):
+                idx = possible_idx
+
         return self.action_space[idx]
 
     def step(self, action):
