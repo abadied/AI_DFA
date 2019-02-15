@@ -1,8 +1,5 @@
-import AutomataLearning
+
 from PolicyIteration import PolicyIteration
-import QLearning
-import Rmax
-import Show
 import StateGenericFunctions
 from State import *
 import random
@@ -11,6 +8,7 @@ import Constants
 from QLearning import QLearningAlg
 from env_class import Env
 from AutomatasState import AutomatasState
+from room import Room
 
 
 def sample_initial_state():
@@ -65,8 +63,8 @@ def main():
     discount_factor = 0.999
     epsilon_min = 0
     epsilon = 1
-    decay_epsilon = 0.9999
-    max_steps = 100
+    decay_epsilon = 0.99999999
+    max_steps = 10000
     episodes = 5000
 
     print("Running Automata Learning")
@@ -135,7 +133,9 @@ def main():
 
     # Showing the game - used by all algorithms
     if policy is not None:
-        Show.show_room(room, policy, all_states, real_initial_state, OPS, TRAN_PROB_MAT, StateGenericFunctions.FINAL_STATES, dfa_dict)
+        cls_room = Room(room, policy, all_states, real_initial_state, OPS, TRAN_PROB_MAT,
+                        StateGenericFunctions.FINAL_STATES, dfa_dict)
+        cls_room.show_room()
 
 
 if __name__ == '__main__':

@@ -39,7 +39,8 @@ class QLearningAlg(object):
             for current_step in range(self.max_steps):
                 curr_observation_idx = self.env.all_possible_states.index(curr_observation.get_state_key())
                 # pick an action in e-greedly manner
-                if random.uniform(0, 1) < max(experiment_epsilon, self.epsilon_min):
+                uniform_sample = random.uniform(0, 1)
+                if uniform_sample < max(experiment_epsilon, self.epsilon_min):
                     action = self.env.sample_action_uniformly()  # random action sampled uniformly
                     action_idx = self.env.idx_from_action(action)
                 else:
@@ -50,7 +51,7 @@ class QLearningAlg(object):
                 next_observation_state_idx = self.env.all_possible_states.index(next_observation.get_state_key())
 
                 if done:
-                    target = reward
+                    target = reward #+ self.discount_factor * np.max(self.Q[next_observation_state_idx, :])
                     self.Q[curr_observation_idx, action_idx] = (1 - self.alpha) * self.Q[curr_observation_idx, action_idx] + self.alpha * target
                     curr_rewards += reward
                     # current_observation = env.reset()

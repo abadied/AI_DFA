@@ -92,7 +92,7 @@ def compute_reward_by_type(state, action, type):
         if action == "pick" and state.state_room[0] in state.state_room[2]:
             return Board.PICKING_CREDIT
     elif type == 'putInBasket':
-        if action == "putInBasket" and state.state_room[0] in state.state_room[2]:
+        if action == "putInBasket" and state.state_room[3] > 0 and state.state_room[0] == Board.BASKET_POSITION:
             return Board.PUTTING_CREDIT * state.state_room[3]
     return 0
 

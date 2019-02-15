@@ -2,8 +2,8 @@ import random
 import copy
 
 room = []   # do not change here
-room_height = 5  # walls included
-room_width = 5  # walls included
+room_height = 4  # walls included
+room_width = 7  # walls included
 # OPS = ["up", "down", "left", "right", "clean", "pick", "putInBasket", "random", "idle"]
 OPS = ["up", "down", "left", "right", "clean", "pick", "putInBasket", "idle"]
 
@@ -52,7 +52,7 @@ CLEANING_CREDIT = 10.
 PICKING_CREDIT = 5.
 PUTTING_CREDIT = 20.
 FINISHING_CREDIT = 100.
-MOVE_COST = 1.
+MOVE_COST = 0.1
 
 
 def init_room():

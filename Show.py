@@ -169,9 +169,11 @@ def take_next_move():
     if CURRENT_STATE.is_end():
         execute_action(OPS[-1])
 
-    elif CURRENT_STATE.legal_op(OPS[realActionIndex]):
+    # elif CURRENT_STATE.legal_op(OPS[realActionIndex]):
+    elif CURRENT_STATE.new_legal_op(OPS[realActionIndex]):
+        temp_new_state = CURRENT_STATE.next_state(OPS[realActionIndex])
         execute_action(OPS[realActionIndex])
-        CURRENT_STATE = CURRENT_STATE.next_state(OPS[realActionIndex])
+        CURRENT_STATE = temp_new_state
         observation = CURRENT_STATE.get_observation()
         CURRENT_AUTO_STATE.next_state(OPS[realActionIndex], observation)
     print("tried to do: ", actionTried, ", action taken: ", OPS[realActionIndex])
@@ -219,7 +221,7 @@ def move_robot(direction, row, col):
 
 def non_move_action(row, col, action):
     global OBJECT_IN_ROBOT_POSITION, NUM_OF_PICKED_FRUITS, ROBOT_BAR, BASKET_BAR
-    if (action == "clean" and ROOM[row][col] in [3, 4, 5]) or (action == "pick" and ROOM[row][col] == 8):
+    if (action == "clean" and ROOM[row][col] in [2, 3, 4, 5]) or (action == "pick" and ROOM[row][col] == 8):
         return
     if action in ["clean", "pick"]:
         create_image(1, row, col, c)
