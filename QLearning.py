@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import copy
 
 
 class QLearningAlg(object):
@@ -34,7 +35,6 @@ class QLearningAlg(object):
         self.Q = np.zeros([len(self.env.all_possible_states), len(self.env.action_space)])
         experiment_epsilon = self.epsilon
         for episode in range(self.n_episodes):
-            curr_rewards = 0
             curr_observation = self.env.reset()
             for current_step in range(self.max_steps):
                 curr_observation_idx = self.env.all_possible_states.index(curr_observation.get_state_key())
@@ -53,7 +53,6 @@ class QLearningAlg(object):
                 if done:
                     target = reward #+ self.discount_factor * np.max(self.Q[next_observation_state_idx, :])
                     self.Q[curr_observation_idx, action_idx] = (1 - self.alpha) * self.Q[curr_observation_idx, action_idx] + self.alpha * target
-                    curr_rewards += reward
                     # current_observation = env.reset()
                     break
                 else:

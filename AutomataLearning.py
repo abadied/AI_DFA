@@ -79,6 +79,7 @@ class AutomataLearner(object):
                       's_minus': s_minus}
         return dfa, words_dict
 
+    # TODO: check why the automata thinks he is in an accepting state when its not
     def learn_all_dfas(self, initial_state, max_word_length, dfa_dict):
         """computes an automaton from sets of words up to specific length. acception of a word is determined by the function
            computeReward_NonMarkovian. current implementation assumes that there is a single accepting state, and for every

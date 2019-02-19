@@ -26,7 +26,7 @@ class State:
         self.end = len(self.state_room[1]) == 0 and len(self.state_room[2]) == 0 and self.state_room[3] == 0
         self.possible_actions = []
         for op in OPS:
-            if self.legal_op(op):
+            if self.new_legal_op(op):
                 self.possible_actions.append(op)
 
     def is_end(self):
@@ -42,8 +42,8 @@ class State:
         :param op:
         :return:
         """
-        if not self.legal_op(op):
-            return self
+        if not self.new_legal_op(op):
+            return copy.deepcopy(self)
 
         new_state = State()
         new_state.state_room = copy.deepcopy(self.state_room[:])  # deep copy
@@ -61,7 +61,7 @@ class State:
                 new_state.state_room[1] = new_state.state_room[1][0:index] + new_state.state_room[1][index + 1:]
                 new_state.end = len(new_state.state_room[1]) == 0 and len(new_state.state_room[2]) == 0 and new_state.state_room[3] == 0
             else:
-                return self
+                return copy.deepcopy(self)
         elif op == "pick":  # pick a fruit from the current position only if there's a fruit there
             if self.state_room[0] in self.state_room[2]:
                 index = self.state_room[2].index(self.state_room[0])
@@ -69,14 +69,14 @@ class State:
                 new_state.state_room[3] += 1
                 new_state.end = len(new_state.state_room[1]) == 0 and len(new_state.state_room[2]) == 0 and new_state.state_room[3] == 0
             else:
-                return self
+                return copy.deepcopy(self)
         elif op == "putInBasket":  # legalOp prevents putInBasket not in the basket
             new_state.state_room[3] = 0
             new_state.end = len(new_state.state_room[1]) == 0 and len(new_state.state_room[2]) == 0 and new_state.state_room[3] == 0
         elif op == "idle":
-            return self
+            return copy.deepcopy(self)
         elif op == "random":
-            legal_ops = [op for op in OPS if self.legal_op(op)]
+            legal_ops = [op for op in OPS if self.new_legal_op(op)]
             return self.next_state(np.random.choice(legal_ops))
         new_state.hash = repr(new_state.state_room)
         return new_state

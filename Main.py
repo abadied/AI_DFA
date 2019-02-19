@@ -64,7 +64,7 @@ def main():
     epsilon_min = 0
     epsilon = 1
     decay_epsilon = 0.99999999
-    max_steps = 10000
+    max_steps = 100
     episodes = 5000
 
     print("Running Automata Learning")
@@ -75,7 +75,7 @@ def main():
                 # 'putInBasket': None}
                 }
     StateGenericFunctions.opening_print(all_states, room, print_room)
-    max_word_length = 100
+    max_word_length = 200
     automata_learner = AutomataLearner(letter_value_dictionary=Constants.letter_value_dictionary, reward_value_dict={})
     real_initial_state = State()
 

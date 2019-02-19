@@ -131,7 +131,7 @@ class Room(object):
 
     def take_next_move(self):
         action_tried = self.policy[str(self.current_auto_state.get_state_key())]
-        action_index = self.ops.index(self.policy[str(self.current_auto_state.get_state_key())])
+        action_index = self.ops.index(action_tried)
         sample = np.random.uniform(0.000000001, 1.)
         sum_prob = 0
         for i in range(len(self.ops)):
@@ -141,7 +141,8 @@ class Room(object):
                 break
         if self.current_state.is_end():
             self.execute_action(self.ops[-1])
-
+            print('end of maze.')
+            return
         # elif CURRENT_STATE.legal_op(OPS[real_action_index]):
         elif self.current_state.new_legal_op(self.ops[real_action_index]):
             temp_new_state = self.current_state.next_state(self.ops[real_action_index])
@@ -149,10 +150,14 @@ class Room(object):
             self.current_state = temp_new_state
             observation = self.current_state.get_observation()
             self.current_auto_state.next_state(self.ops[real_action_index], observation)
-        print("tried to do: ", action_tried, ", action taken: ", self.ops[real_action_index])
-        return
+            print("tried to do: ", action_tried, ", action taken: ", self.ops[real_action_index])
+            return
+        else:
+            observation = self.current_state.get_observation()
+            self.current_auto_state.next_state(self.ops[real_action_index], observation)
+            print("tried to do: ", action_tried)
 
-    def play_episode(self):
+    def play_episode(self, event):
         while True:
             self.canvas.update_idletasks()
             self.take_next_move()

@@ -31,7 +31,7 @@ def get_all_states_impl(current_state, all_states, ops):
     """
     global FINAL_STATES
     for i in ops:
-        if current_state.legal_op(i):
+        if current_state.new_legal_op(i):
             new_state = current_state.next_state(i)
             if new_state.hash not in all_states.keys():  # maybe it's better to use hash function in order to construct allStates
                 all_states[new_state.hash] = new_state
@@ -146,7 +146,7 @@ def expected_return(all_states, state_key, action, state_value, ops, compute_rew
     for i in range(len(ops)):
         prob = Board.TRAN_PROB_MAT[ops.index(action)][i]
         real_action = ops[i]
-        if all_states[state_key].legal_op(real_action):
+        if all_states[state_key].new_legal_op(real_action):
             newState = all_states[state_key].next_state(real_action)
             reward = float(compute_reward_function(all_states, all_states[state_key], real_action))
             returns += prob * (reward + Board.DISCOUNT * state_value[newState.hash])
@@ -243,7 +243,7 @@ def compute_actual_action(action_chosen, current_state):
             real_action_index = i
             break
     real_action = Board.OPS[real_action_index]
-    if not current_state.legal_op(real_action):
+    if not current_state.new_legal_op(real_action):
         real_action = "idle"
     return real_action
 
@@ -270,8 +270,8 @@ def get_least_common_op(possible_actions_dict: dict):
 
 def get_random_op(possible_actions_dict: dict):
     possible_ops_list = list(possible_actions_dict.keys())
-    rand_idx = random.randint(0, len(Constants.OPS) - 1)
-    return Constants.OPS[rand_idx]
+    rand_idx = random.randint(0, len(possible_ops_list) - 1)
+    return possible_ops_list[rand_idx]
 
 
 def get_all_automatas_states(dfa_dict: dict, observables: list = list()):

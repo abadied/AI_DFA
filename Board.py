@@ -2,12 +2,13 @@ import random
 import copy
 
 room = []   # do not change here
-room_height = 4  # walls included
-room_width = 7  # walls included
+room_height = 3  # walls included
+room_width = 6  # walls included
 # OPS = ["up", "down", "left", "right", "clean", "pick", "putInBasket", "random", "idle"]
-OPS = ["up", "down", "left", "right", "clean", "pick", "putInBasket", "idle"]
+# OPS = ["up", "down", "left", "right", "clean", "pick", "putInBasket", "idle"]
+OPS = ["up", "down", "left", "right", "clean", "pick", "putInBasket"]
 
-ROBOT_POSITION = 2, 1
+ROBOT_POSITION = 1, 1
 BASKET_POSITION = [1, 2]    # don't comment for all algorithms. can be changed.
 
 # the i-j cell in the transition probability matrix indicates the probability to do action j
@@ -23,26 +24,26 @@ BASKET_POSITION = [1, 2]    # don't comment for all algorithms. can be changed.
 #                  [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0, 0.125],
 #                  [0, 0, 0, 0, 0, 0, 0, 0, 1]]
 
-TRAN_PROB_MAT = [[0.8, 0, 0.1, 0.1, 0, 0, 0, 0],
-                 [0, 0.8, 0.1, 0.1, 0, 0, 0, 0],
-                 [0.1, 0.1, 0.8, 0, 0, 0, 0, 0],
-                 [0.1, 0.1, 0, 0.8, 0, 0, 0, 0],
-                 [0, 0, 0, 0, 0.8, 0, 0, 0.2],
-                 [0, 0, 0, 0, 0, 0.8, 0, 0.2],
-                 [0, 0, 0, 0, 0, 0, 0.8, 0.2],
-                 [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
-                 [0, 0, 0, 0, 0, 0, 0, 1]]
+# TRAN_PROB_MAT = [[0.8, 0, 0.1, 0.1, 0, 0, 0, 0],
+#                  [0, 0.8, 0.1, 0.1, 0, 0, 0, 0],
+#                  [0.1, 0.1, 0.8, 0, 0, 0, 0, 0],
+#                  [0.1, 0.1, 0, 0.8, 0, 0, 0, 0],
+#                  [0, 0, 0, 0, 0.8, 0, 0, 0.2],
+#                  [0, 0, 0, 0, 0, 0.8, 0, 0.2],
+#                  [0, 0, 0, 0, 0, 0, 0.8, 0.2],
+#                  [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
+#                  [0, 0, 0, 0, 0, 0, 0, 1]]
 
 # for debugging purposes, you might want to use this deterministic transition probabilities matrix
-# TRAN_PROB_MAT = [[1, 0, 0, 0, 0, 0, 0, 0, 0],
-#                  [0, 1, 0, 0, 0, 0, 0, 0, 0],
-#                  [0, 0, 1, 0, 0, 0, 0, 0, 0],
-#                  [0, 0, 0, 1, 0, 0, 0, 0, 0],
-#                  [0, 0, 0, 0, 1, 0, 0, 0, 0],
-#                  [0, 0, 0, 0, 0, 1, 0, 0, 0],
-#                  [0, 0, 0, 0, 0, 0, 1, 0, 0],
-#                  [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0, 0.125],
-#                  [0, 0, 0, 0, 0, 0, 0, 0, 1]]
+TRAN_PROB_MAT = [[1, 0, 0, 0, 0, 0, 0, 0, 0],
+                 [0, 1, 0, 0, 0, 0, 0, 0, 0],
+                 [0, 0, 1, 0, 0, 0, 0, 0, 0],
+                 [0, 0, 0, 1, 0, 0, 0, 0, 0],
+                 [0, 0, 0, 0, 1, 0, 0, 0, 0],
+                 [0, 0, 0, 0, 0, 1, 0, 0, 0],
+                 [0, 0, 0, 0, 0, 0, 1, 0, 0],
+                 [0, 0, 0, 0, 0, 0, 0, 1, 0],
+                 [0, 0, 0, 0, 0, 0, 0, 0, 1]]
 
 
 DISCOUNT = 0.9
@@ -52,7 +53,7 @@ CLEANING_CREDIT = 10.
 PICKING_CREDIT = 5.
 PUTTING_CREDIT = 20.
 FINISHING_CREDIT = 100.
-MOVE_COST = 0.1
+MOVE_COST = 1.
 
 
 def init_room():
@@ -86,7 +87,7 @@ def scattering_stains():
     #     if room[num1][num2] == 1:
     #         room[num1][num2] = 8
     #         i += 1
-    room[1][1] = 8
+    room[1][3] = 8
 
 
 # refer the guide
