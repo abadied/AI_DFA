@@ -24,10 +24,13 @@ class State:
         self.state_room.append(carried_fruits)  # index 3
         self.hash = repr(self.state_room)  # each stateRoom has a string that is it's name (and it's unique)
         self.end = len(self.state_room[1]) == 0 and len(self.state_room[2]) == 0 and self.state_room[3] == 0
-        self.possible_actions = []
+
+    def get_possible_actions(self):
+        possible_actions = []
         for op in OPS:
             if self.new_legal_op(op):
-                self.possible_actions.append(op)
+                possible_actions.append(op)
+        return possible_actions
 
     def is_end(self):
         """

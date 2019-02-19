@@ -91,7 +91,7 @@ class AutomataLearner(object):
         for _key in dfa_dict:
             reward_dict[_key] = {'last_value': False, 's_plus': set(), 's_minus': set()}
 
-        while counter < 20:
+        while counter < 100:
             current_state = copy.deepcopy(initial_state)
             counter += 1
             word = ""

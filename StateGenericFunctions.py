@@ -250,7 +250,7 @@ def compute_actual_action(action_chosen, current_state):
 
 def create_possible_ops_dict(state):
     possible_ops_dict = {}
-    for _op in state.possible_actions:
+    for _op in state.get_possible_actions():
         possible_ops_dict[_op] = 0
 
     return possible_ops_dict
