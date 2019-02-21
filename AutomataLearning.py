@@ -109,7 +109,7 @@ class AutomataLearner(object):
                 if current_state.hash not in states_cash_dict.keys():
                     states_cash_dict[current_state.hash] = gf.create_possible_ops_dict(current_state)
                 observation = current_state.get_observation()
-                word += current_action_letter + observation
+                word += current_action_letter #+ observation
                 num_of_steps_counter += 1
 
                 for _key in reward_dict:

@@ -3,7 +3,7 @@ import copy
 
 room = []   # do not change here
 room_height = 3  # walls included
-room_width = 6  # walls included
+room_width = 8 # walls included
 # OPS = ["up", "down", "left", "right", "clean", "pick", "putInBasket", "random", "idle"]
 # OPS = ["up", "down", "left", "right", "clean", "pick", "putInBasket", "idle"]
 OPS = ["up", "down", "left", "right", "clean", "pick", "putInBasket"]
@@ -87,7 +87,7 @@ def scattering_stains():
     #     if room[num1][num2] == 1:
     #         room[num1][num2] = 8
     #         i += 1
-    room[1][3] = 8
+    room[1][4] = 8
 
 
 # refer the guide

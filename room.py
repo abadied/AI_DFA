@@ -24,7 +24,7 @@ class Room(object):
         self.room_width = len(room[0])
         self.ops = operations
         self.tran_prob_matrix = tran_prob_mat
-        self.current_state = initial_state
+        self.current_state = copy.deepcopy(initial_state)
         self.init_state = copy.deepcopy(initial_state)
         self.all_states = all_states
         self.policy = policy

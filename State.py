@@ -52,12 +52,24 @@ class State:
         new_state.state_room = copy.deepcopy(self.state_room[:])  # deep copy
         if op == "up":
             new_state.state_room[0][0] = self.state_room[0][0] - 1
+            new_state.end = len(new_state.state_room[1]) == 0 and len(new_state.state_room[2]) == 0 and \
+                            new_state.state_room[3] == 0
+
         elif op == "down":
             new_state.state_room[0][0] = self.state_room[0][0] + 1
+            new_state.end = len(new_state.state_room[1]) == 0 and len(new_state.state_room[2]) == 0 and \
+                            new_state.state_room[3] == 0
+
         elif op == "left":
             new_state.state_room[0][1] = self.state_room[0][1] - 1
+            new_state.end = len(new_state.state_room[1]) == 0 and len(new_state.state_room[2]) == 0 and \
+                            new_state.state_room[3] == 0
+
         elif op == "right":
             new_state.state_room[0][1] = self.state_room[0][1] + 1
+            new_state.end = len(new_state.state_room[1]) == 0 and len(new_state.state_room[2]) == 0 and \
+                            new_state.state_room[3] == 0
+
         elif op == "clean":  # remove a stain from the current position only if there's a stain there
             if self.state_room[0] in self.state_room[1]:
                 index = self.state_room[1].index(self.state_room[0])
@@ -152,7 +164,7 @@ class State:
             return True
         elif op == "right" and room[row_position_of_robot][col_position_of_robot + 1] not in occupied:
             return True
-        elif op == "clean" and [row_position_of_robot, col_position_of_robot] in self.state_room[1]:
+        elif op == "clean":# and [row_position_of_robot, col_position_of_robot] in self.state_room[1]:
             return True
         elif op == "pick" and [row_position_of_robot, col_position_of_robot] in self.state_room[2]:
             return True

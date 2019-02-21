@@ -40,10 +40,10 @@ class AutomatasState:
             # TODO: convert op and obs to relevant numbers according to alphabet from the automata
             alphabet_mapping = self.dfa_dict[dfa_key]['dfa'].alphabet()
             op_idx = int(alphabet_mapping[Constants.value_letter_dictionary[op]])
-            obs_idx = int(alphabet_mapping[obs])
+            # obs_idx = int(alphabet_mapping[obs])
             dfa_matrix = self.dfa_dict[dfa_key]['dfa'].dfa()
             self.state_in_auto[dfa_key] = dfa_matrix[self.state_in_auto[dfa_key]][op_idx]
-            self.state_in_auto[dfa_key] = dfa_matrix[self.state_in_auto[dfa_key]][obs_idx]
+            # self.state_in_auto[dfa_key] = dfa_matrix[self.state_in_auto[dfa_key]][obs_idx]
 
         def initialize_obs_dict():
             for obs_key in self.curr_obs.keys():
