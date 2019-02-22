@@ -2,8 +2,8 @@ import random
 import copy
 
 room = []   # do not change here
-room_height = 3  # walls included
-room_width = 8 # walls included
+room_height = 6  # walls included
+room_width = 6 # walls included
 # OPS = ["up", "down", "left", "right", "clean", "pick", "putInBasket", "random", "idle"]
 # OPS = ["up", "down", "left", "right", "clean", "pick", "putInBasket", "idle"]
 OPS = ["up", "down", "left", "right", "clean", "pick", "putInBasket"]
@@ -63,17 +63,12 @@ def init_room():
     for i in range(1, room_height - 1):
         for j in range(1, room_width - 1):
             room[i][j] = 1
-    # walls = []
-    # for i in range(1, roomWidth/2 - 2):
-    #     walls.append([roomHeight / 2, i])
-    # for i in range(1, roomHeight/2 + 1):
-    #     walls.append([i, roomWidth / 2])
-    # for i in range(2):
-    #     walls.append([roomHeight / 2, i + roomWidth/2 + 1])
-    # for i in range(roomHeight / 2 + 3, roomHeight):
-    #     walls.append([i, roomWidth / 2 + 2])
-    # for [i, j] in walls:
-    #     room[i][j] = 0
+
+    room[2][3] = 0
+    room[3][3] = 0
+    room[3][2] = 0
+    room[2][2] = 0
+
     room[ROBOT_POSITION[0]][ROBOT_POSITION[1]] = 9  # initial robot's location
     room[BASKET_POSITION[0]][BASKET_POSITION[1]] = 2  # initial basket's location
 
@@ -87,7 +82,7 @@ def scattering_stains():
     #     if room[num1][num2] == 1:
     #         room[num1][num2] = 8
     #         i += 1
-    room[1][4] = 8
+    room[3][4] = 8
 
 
 # refer the guide
