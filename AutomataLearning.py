@@ -102,6 +102,7 @@ class AutomataLearner(object):
             while not current_state.is_end() and num_of_steps_counter < max_word_length:
                 # action = gf.get_least_common_op(states_cash_dict[current_state.hash])
                 action = gf.get_random_op(states_cash_dict[current_state.hash])
+
                 current_action_letter = self.convert_value_to_letter(action)
                 for _key in dfa_dict:
                     reward_dict[_key]['last_value'] = self.check_reward_type(_key, current_state, action)
@@ -117,6 +118,9 @@ class AutomataLearner(object):
                         reward_dict[_key]['s_plus'].add(word)
                     else:
                         reward_dict[_key]['s_minus'].add(word)
+
+            if not current_state.is_end():
+                counter -= 1
 
         complete_dfa_dict = {}
         words_dict = {}

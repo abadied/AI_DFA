@@ -50,14 +50,6 @@ class AutomatasState:
                 self.curr_obs[obs_key] = 0
 
         # update obs
-        # if obs == 'f':      # fruit no walls
-        #     self.curr_obs['fruit'] = 1
-        #
-        # elif obs == 's':    # stain no walls
-        #     self.curr_obs['stain'] = 1
-        #
-        # elif obs == 'b':    # basket no walls
-        #     self.curr_obs['basket'] = 1
 
         if obs == 'w':    # right wall
             initialize_obs_dict()
@@ -94,6 +86,40 @@ class AutomatasState:
             initialize_obs_dict()
             self.curr_obs['right_wall'] = 1
             self.curr_obs['downer_wall'] = 1
+
+        elif obs == 'v':    # left right wall
+            initialize_obs_dict()
+            self.curr_obs['right_wall'] = 1
+            self.curr_obs['left_wall'] = 1
+
+        elif obs == 'j':    # upper downer wall
+            initialize_obs_dict()
+            self.curr_obs['upper_wall'] = 1
+            self.curr_obs['downer_wall'] = 1
+
+        elif obs == 'f':      # up down right walls
+            initialize_obs_dict()
+            self.curr_obs['upper_wall'] = 1
+            self.curr_obs['downer_wall'] = 1
+            self.curr_obs['right_wall'] = 1
+
+        elif obs == 's':    # up down left walls
+            initialize_obs_dict()
+            self.curr_obs['upper_wall'] = 1
+            self.curr_obs['downer_wall'] = 1
+            self.curr_obs['left_wall'] = 1
+
+        elif obs == 'b':    # right left down walls
+            initialize_obs_dict()
+            self.curr_obs['left_wall'] = 1
+            self.curr_obs['downer_wall'] = 1
+            self.curr_obs['right_wall'] = 1
+
+        elif obs == 'm':    # right left up walls
+            initialize_obs_dict()
+            self.curr_obs['upper_wall'] = 1
+            self.curr_obs['left_wall'] = 1
+            self.curr_obs['right_wall'] = 1
 
         elif obs == 'n':    # no walls
             initialize_obs_dict()

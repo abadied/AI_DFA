@@ -14,17 +14,18 @@ letter_value_dictionary = {"u": "up",
                            "y": "left_down_wall",
                            "z": "right_up_wall",
                            "a": "right_down_wall",
+                           "v": "left_right_wall",
+                           "j": "upper_downer_wall",
                            "n": "no_walls",
-                           "f": "fruit",
-                           "s": "stain",
-                           "b": "basket",
-                           "m": "end"}
+                           "f": "up_down_right_wall",
+                           "s": "up_down_left_wall",
+                           "b": "right_left_down_wall",
+                           "m": "right_left_up_wall"}
 value_letter_dictionary = {letter_value_dictionary[key]: key for key in letter_value_dictionary.keys()}
 
 credits = {'pick': 5, 'clean': 10, 'putInBasket': 20}
 OPS = ["up", "down", "left", "right", "clean", "pick", "putInBasket", "idle"]
-OBS = ["right_wall", "left_wall", "upper_wall", "downer_wall", "left_up_wall", "left_down_wall", "right_up_wall",
-       "right_down_wall", "no_walls", "fruit", "stain", "basket", "end"]
+
 
 # optimization_algorithm = 'policy_iteration'
 optimization_algorithm = 'q_learning'

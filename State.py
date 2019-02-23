@@ -177,25 +177,35 @@ class State:
         return the state observation with certain probability
         :return: observation string
         """
+        # TODO: add probabilities to observations
         row_pos = self.state_room[0][0]
         col_pos = self.state_room[0][1]
-        if row_pos == 1:
-            if col_pos == 1:
-                return 'x'
-            if col_pos == room_width - 2:   # -2 because walls are included
-                return 'z'
-            return 'e'
-        elif row_pos == room_height - 2:    # -2 because walls are included
-            if col_pos == 1:
-                return 'y'
-            if col_pos == room_width - 2:   # -2 because walls are included
-                return 'a'
-            return 't'
-        elif col_pos == 1:
-            return 'q'
-        elif col_pos == room_width - 2:     # -2 because walls are included
-            return 'w'
-        return 'n'
+        right_wall = room[row_pos][col_pos + 1] == 0
+        left_wall = room[row_pos][col_pos - 1] == 0
+        upper_wall = room[row_pos - 1][col_pos] == 0
+        downer_wall = room[row_pos + 1][col_pos] == 0
+
+        obs_dict = {"w": right_wall and not left_wall and not upper_wall and not downer_wall,     # "right_wall"
+                    "q": left_wall and not right_wall and not upper_wall and not downer_wall,     # "left_wall"
+                    "e": upper_wall and not left_wall and not right_wall and not downer_wall,     # "upper_wall"
+                    "t": downer_wall and not left_wall and not upper_wall and not right_wall,     # "downer_wall"
+                    "x": left_wall and upper_wall and not right_wall and not downer_wall,         # "left_up_wall"
+                    "y": left_wall and downer_wall and not upper_wall and not right_wall,         # "left_down_wall"
+                    "z": right_wall and upper_wall and not left_wall and not downer_wall,         # "right_up_wall"
+                    "a": right_wall and downer_wall and not upper_wall and not left_wall,         # "right_down_wall"
+                    "v": right_wall and left_wall and not upper_wall and not downer_wall,         # "left_right_wall"
+                    "j": upper_wall and downer_wall and not left_wall and not right_wall,         # "upper_downer_wall"
+                    "f": upper_wall and downer_wall and not left_wall and right_wall,             # "up_down_right_wall"
+                    "s": upper_wall and downer_wall and left_wall and not right_wall,             # "up_down_left_wall"
+                    "b": not upper_wall and downer_wall and left_wall and right_wall,             # "right_left_down_wall"
+                    "m": upper_wall and not downer_wall and left_wall and right_wall,             # "right_left_up_wall"
+                    "n": not right_wall and not left_wall and not upper_wall and not downer_wall} # "no_walls"
+
+        for key, val in obs_dict.items():
+            if val:
+                return key
+
+        raise ValueError('unknown observation event')
 
     def print_state(self):
         """
@@ -210,7 +220,7 @@ class State:
         :return: action
         """
 
-        rand = random.randint(0, len(self.possible_actions) - 1)
-        return self.possible_actions[rand]
+        rand = random.randint(0, len(self.get_possible_actions()) - 1)
+        return self.get_possible_actions()[rand]
 
 
