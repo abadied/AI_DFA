@@ -3,6 +3,7 @@ import numpy as np
 import random
 import math
 
+
 class State:
 
     """This class represents a specific state of the game. it contains all parameters to fully
@@ -39,12 +40,27 @@ class State:
         """
         return self.end
 
+    def get_op_with_prob(self, action):
+        action_index = OPS.index(action)
+        sample = np.random.uniform(0.000000001, 1.)
+        sum_prob = 0
+        real_action_index = None
+        for i in range(len(OPS)):
+            sum_prob += TRAN_PROB_MAT[action_index][i]
+            if sum_prob > sample:
+                real_action_index = i
+                break
+        return OPS[real_action_index]
+
     def next_state(self, op):
         """
         givan a state and an operation, returns the next room's state
         :param op:
         :return:
         """
+        # NEW - added op probability
+        op = self.get_op_with_prob(op)
+
         if not self.new_legal_op(op):
             return copy.deepcopy(self)
 
@@ -185,6 +201,22 @@ class State:
         upper_wall = room[row_pos - 1][col_pos] == 0
         downer_wall = room[row_pos + 1][col_pos] == 0
 
+        # add probability to observation
+        sample_right = np.random.uniform(0.000000001, 1.)
+        sample_left = np.random.uniform(0.000000001, 1.)
+        sample_up = np.random.uniform(0.000000001, 1.)
+        sample_down = np.random.uniform(0.000000001, 1.)
+
+        error_threshold = 0.9
+        if sample_right > error_threshold:
+            right_wall = not right_wall
+        if sample_left > error_threshold:
+            left_wall = not left_wall
+        if sample_up > error_threshold:
+            upper_wall = not upper_wall
+        if sample_down > error_threshold:
+            downer_wall = not downer_wall
+
         obs_dict = {"w": right_wall and not left_wall and not upper_wall and not downer_wall,     # "right_wall"
                     "q": left_wall and not right_wall and not upper_wall and not downer_wall,     # "left_wall"
                     "e": upper_wall and not left_wall and not right_wall and not downer_wall,     # "upper_wall"
@@ -199,7 +231,8 @@ class State:
                     "s": upper_wall and downer_wall and left_wall and not right_wall,             # "up_down_left_wall"
                     "b": not upper_wall and downer_wall and left_wall and right_wall,             # "right_left_down_wall"
                     "m": upper_wall and not downer_wall and left_wall and right_wall,             # "right_left_up_wall"
-                    "n": not right_wall and not left_wall and not upper_wall and not downer_wall} # "no_walls"
+                    "n": not right_wall and not left_wall and not upper_wall and not downer_wall,
+                    "g": right_wall and left_wall and upper_wall and downer_wall} # "no_walls"
 
         for key, val in obs_dict.items():
             if val:

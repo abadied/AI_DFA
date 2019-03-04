@@ -18,7 +18,7 @@ def opening_print(all_states, room, print_room):
     """
     print("room representation: ")
     print_room(room)
-    print("number of states: ", len(list(all_states.keys())))
+    # print("number of states: ", len(list(all_states.keys())))
 
 
 def get_all_states_impl(current_state, all_states, ops):
@@ -29,6 +29,7 @@ def get_all_states_impl(current_state, all_states, ops):
     :param ops:
     :return:
     """
+    # TODO: check!
     global FINAL_STATES
     for i in ops:
         if current_state.new_legal_op(i):

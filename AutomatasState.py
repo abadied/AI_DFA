@@ -120,7 +120,12 @@ class AutomatasState:
             self.curr_obs['upper_wall'] = 1
             self.curr_obs['left_wall'] = 1
             self.curr_obs['right_wall'] = 1
-
+        elif obs == 'g':
+            initialize_obs_dict()
+            self.curr_obs['upper_wall'] = 1
+            self.curr_obs['left_wall'] = 1
+            self.curr_obs['right_wall'] = 1
+            self.curr_obs['downer_wall'] = 1
         elif obs == 'n':    # no walls
             initialize_obs_dict()
 

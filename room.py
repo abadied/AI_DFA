@@ -132,13 +132,14 @@ class Room(object):
     def take_next_move(self):
         action_tried = self.policy[str(self.current_auto_state.get_state_key())]
         action_index = self.ops.index(action_tried)
-        sample = np.random.uniform(0.000000001, 1.)
-        sum_prob = 0
-        for i in range(len(self.ops)):
-            sum_prob += self.tran_prob_matrix[action_index][i]
-            if sum_prob > sample:
-                real_action_index = i
-                break
+        # sample = np.random.uniform(0.000000001, 1.)
+        # sum_prob = 0
+        # for i in range(len(self.ops)):
+        #     sum_prob += self.tran_prob_matrix[action_index][i]
+        #     if sum_prob > sample:
+        #         real_action_index = i
+        #         break
+        real_action_index = action_index
         if self.current_state.is_end():
             self.execute_action(self.ops[-1])
             print('end of maze.')

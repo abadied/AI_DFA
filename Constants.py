@@ -20,7 +20,8 @@ letter_value_dictionary = {"u": "up",
                            "f": "up_down_right_wall",
                            "s": "up_down_left_wall",
                            "b": "right_left_down_wall",
-                           "m": "right_left_up_wall"}
+                           "m": "right_left_up_wall",
+                           "g": "all_walls"}
 value_letter_dictionary = {letter_value_dictionary[key]: key for key in letter_value_dictionary.keys()}
 
 credits = {'pick': 5, 'clean': 10, 'putInBasket': 20}

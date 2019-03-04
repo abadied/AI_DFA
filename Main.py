@@ -9,6 +9,13 @@ from QLearning import QLearningAlg
 from env_class import Env
 from AutomatasState import AutomatasState
 from room import Room
+from IPython.display import display
+import graphviz as gv
+import networkx as nx
+import matplotlib.pyplot as plt
+# add graphviz to path
+import os
+os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
 
 
 def sample_initial_state():
@@ -75,7 +82,7 @@ def main():
                 # 'putInBasket': None}
                 }
     StateGenericFunctions.opening_print(all_states, room, print_room)
-    max_word_length = 200
+    max_word_length = 50
     automata_learner = AutomataLearner(letter_value_dictionary=Constants.letter_value_dictionary, reward_value_dict={})
     real_initial_state = State()
 
@@ -83,6 +90,8 @@ def main():
     dfa_dict, words_dict = automata_learner.learn_all_dfas(initial_state=real_initial_state,
                                                            max_word_length=max_word_length,
                                                            dfa_dict=dfa_dict)
+
+    dfa_dict['clean']['dfa'].dot().render('test-output/round-table.gv', view=True)
 
     initial_state = '0' * len(list(dfa_dict.keys()))
 
