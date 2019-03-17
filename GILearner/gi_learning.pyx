@@ -2,46 +2,22 @@
 This Cython module wraps gi_learning API from c++ to python.
 """
 
-from libcpp.string cimport string
-from libcpp.map cimport map
-ctypedef unsigned int Symbol
-ctypedef unsigned int State
-ctypedef unsigned int** Matrix;
-from graphviz import Source
-cimport numpy as cnp
-import numpy as np
-from enum import IntEnum
-
-cdef extern from "DFA.hpp" namespace "gi":
-    cdef cppclass DFA:
-        DFA(const map[Symbol, char] &alf) except +
-        string dfa()
-        string dot()
-        State state_count()
-        string transitions()
-        Matrix ttable;
-
+from gi.dfa cimport *
+from gi.dfa import *
 
 cdef extern from "EDSM.hpp" namespace "gi":
+    # noinspection PyPep8Naming
     cdef cppclass EDSM:
         EDSM() except +
         void add(char*, unsigned int, int, int) except +
         DFA* run() except +
-        unsigned int get_alphabet_count();
-        unsigned int get_positive_count();
-        unsigned int get_negative_count();
-        string get_alphabet();
+        unsigned int get_alphabet_count()
+        unsigned int get_positive_count()
+        unsigned int get_negative_count()
+        string get_alphabet()
 
 
-class StateType(IntEnum):
-    """
-    Enum for the state types.
-    """
-    REJECT = 0
-    ACCEPT = 1
-    NORMAL = 3
-    UNREACHABLE = 4
-
+# noinspection PyAttributeOutsideInit,PyUnresolvedReferences
 cdef class EDSMSolver:
     """
     This class wraps the EDSM learn
@@ -77,7 +53,7 @@ cdef class EDSMSolver:
         self._state_type = None
         self._pos_count = 0
         self._neg_count = 0
-        
+
 
     def add_pos(self, line, weight=0):
         """
@@ -85,7 +61,7 @@ cdef class EDSMSolver:
         :param line: A string of actions depicted as characters.
         :param weight: The weight for this trace sample.
         """
-        self.c_edsm.add(line.encode('UTF-8', 'strict'), 
+        self.c_edsm.add(line.encode('UTF-8', 'strict'),
                         len(line), weight, 1)
 
     def add_neg(self, line, weight=0):
@@ -94,7 +70,7 @@ cdef class EDSMSolver:
         :param line: A string of actions depicted as characters.
         :param weight: The weight for this trace sample.
         """
-        self.c_edsm.add(line.encode('UTF-8', 'strict'), 
+        self.c_edsm.add(line.encode('UTF-8', 'strict'),
                         len(line), weight, 0)
 
     def run(self):
@@ -121,8 +97,9 @@ cdef class EDSMSolver:
         """
         :return: Dot format of the DFA.
         """
-        return Source(self.c_dfa.dot().decode('UTF-8'))\
-                      if self.c_dfa != NULL else "empty"
+        if self.c_dfa != NULL:
+            return Source(self.c_dfa.dot().decode('UTF-8')
+                          if self.c_dfa != NULL else '')
 
 
     def alphabet_count(self):
@@ -159,7 +136,7 @@ cdef class EDSMSolver:
 
     def alphabet(self):
         """
-        Get hte alphabet mapping from char to index.
+        Get the alphabet mapping from char to index.
         :return:
         """
         if self._alphabet is not None:
@@ -198,8 +175,8 @@ cdef class EDSMSolver:
             return self._dfa
         if self.c_dfa == NULL:
             return False
-        self._dfa = np.zeros((self.state_count(), 
-                              self.alphabet_count()), 
+        self._dfa = np.zeros((self.state_count(),
+                              self.alphabet_count()),
                              dtype=int)
         self._state_type = {}
         for s in range(self._dfa.shape[0]):
@@ -239,10 +216,10 @@ cdef class EDSMSolver:
         return self._reachable
 
     def __getstate__(self):
-        return (self._dfa, self._alphabet, self._reachable, self._state_type, 
-                self.c_edsm.get_positive_count(), 
+        return (self._dfa, self._alphabet, self._reachable, self._state_type,
+                self.c_edsm.get_positive_count(),
                 self.c_edsm.get_negative_count())
 
     def __setstate__(self, state):
-        self._dfa, self._alphabet, self._reachable, \
-        self._state_type, self._pos_count, self._neg_count = state
+        (self._dfa, self._alphabet, self._reachable,
+         self._state_type, self._pos_count, self._neg_count) = state

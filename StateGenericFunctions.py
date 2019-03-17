@@ -33,7 +33,7 @@ def get_all_states_impl(current_state, all_states, ops):
     global FINAL_STATES
     for i in ops:
         if current_state.new_legal_op(i):
-            new_state = current_state.next_state(i)
+            new_state, _ = current_state.next_state(i)
             if new_state.hash not in all_states.keys():  # maybe it's better to use hash function in order to construct allStates
                 all_states[new_state.hash] = new_state
                 if not new_state.is_end():
@@ -63,7 +63,8 @@ def compute_reward(allStates, state, action):
     :param action:
     :return:
     """
-    if not state.is_end() and state.next_state(action).is_end():
+    next_state, _ = state.next_state(action)
+    if not state.is_end() and next_state.is_end():
         return Board.FINISHING_CREDIT
     return -Board.MOVE_COST
 
@@ -82,8 +83,10 @@ def compute_reward_2(allStates, state, action):
 
 
 def compute_reward_by_type(state, action, type):
+
     if type == 'end':
-        if not state.is_end() and state.next_state(action).is_end():
+        next_state, _ = state.next_state(action)
+        if not state.is_end() and next_state.is_end():
             return Board.FINISHING_CREDIT
 
     elif type == 'clean':
@@ -148,7 +151,7 @@ def expected_return(all_states, state_key, action, state_value, ops, compute_rew
         prob = Board.TRAN_PROB_MAT[ops.index(action)][i]
         real_action = ops[i]
         if all_states[state_key].new_legal_op(real_action):
-            newState = all_states[state_key].next_state(real_action)
+            newState, _ = all_states[state_key].next_state(real_action)
             reward = float(compute_reward_function(all_states, all_states[state_key], real_action))
             returns += prob * (reward + Board.DISCOUNT * state_value[newState.hash])
         elif not all_states[state_key].is_end():

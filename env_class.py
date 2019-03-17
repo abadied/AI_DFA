@@ -48,7 +48,7 @@ class Env(object):
         :return:
         """
         reward = self.reward_function(None, self.real_current_state, action)
-        self.real_current_state = self.real_current_state.next_state(action)
+        self.real_current_state, _ = self.real_current_state.next_state(action)
         obs = self.real_current_state.get_observation()
         self.simulated_current_state.next_state(action, obs)
         return self.simulated_current_state, reward, self.real_current_state.is_end()

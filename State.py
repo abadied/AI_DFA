@@ -62,7 +62,7 @@ class State:
         op = self.get_op_with_prob(op)
 
         if not self.new_legal_op(op):
-            return copy.deepcopy(self)
+            return copy.deepcopy(self), op
 
         new_state = State()
         new_state.state_room = copy.deepcopy(self.state_room[:])  # deep copy
@@ -92,7 +92,7 @@ class State:
                 new_state.state_room[1] = new_state.state_room[1][0:index] + new_state.state_room[1][index + 1:]
                 new_state.end = len(new_state.state_room[1]) == 0 and len(new_state.state_room[2]) == 0 and new_state.state_room[3] == 0
             else:
-                return copy.deepcopy(self)
+                return copy.deepcopy(self), op
         elif op == "pick":  # pick a fruit from the current position only if there's a fruit there
             if self.state_room[0] in self.state_room[2]:
                 index = self.state_room[2].index(self.state_room[0])
@@ -100,17 +100,17 @@ class State:
                 new_state.state_room[3] += 1
                 new_state.end = len(new_state.state_room[1]) == 0 and len(new_state.state_room[2]) == 0 and new_state.state_room[3] == 0
             else:
-                return copy.deepcopy(self)
+                return copy.deepcopy(self), op
         elif op == "putInBasket":  # legalOp prevents putInBasket not in the basket
             new_state.state_room[3] = 0
             new_state.end = len(new_state.state_room[1]) == 0 and len(new_state.state_room[2]) == 0 and new_state.state_room[3] == 0
         elif op == "idle":
-            return copy.deepcopy(self)
+            return copy.deepcopy(self), op
         elif op == "random":
             legal_ops = [op for op in OPS if self.new_legal_op(op)]
-            return self.next_state(np.random.choice(legal_ops))
+            return self.next_state(np.random.choice(legal_ops)), op
         new_state.hash = repr(new_state.state_room)
-        return new_state
+        return new_state, op
 
     def probablistic_next_state(self, op):
         """givan a state and an operation to apply, computes a possible action to take by the TRAN_PROB_MAT imported from Board.py 
@@ -207,7 +207,7 @@ class State:
         sample_up = np.random.uniform(0.000000001, 1.)
         sample_down = np.random.uniform(0.000000001, 1.)
 
-        error_threshold = 0.9
+        error_threshold = 1
         if sample_right > error_threshold:
             right_wall = not right_wall
         if sample_left > error_threshold:

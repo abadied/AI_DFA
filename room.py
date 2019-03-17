@@ -145,18 +145,19 @@ class Room(object):
             print('end of maze.')
             return
         # elif CURRENT_STATE.legal_op(OPS[real_action_index]):
-        elif self.current_state.new_legal_op(self.ops[real_action_index]):
-            temp_new_state = self.current_state.next_state(self.ops[real_action_index])
-            self.execute_action(self.ops[real_action_index])
-            self.current_state = temp_new_state
-            observation = self.current_state.get_observation()
-            self.current_auto_state.next_state(self.ops[real_action_index], observation)
-            print("tried to do: ", action_tried, ", action taken: ", self.ops[real_action_index])
-            return
-        else:
-            observation = self.current_state.get_observation()
-            self.current_auto_state.next_state(self.ops[real_action_index], observation)
-            print("tried to do: ", action_tried)
+        # elif self.current_state.new_legal_op(self.ops[real_action_index]):
+        temp_new_state, op = self.current_state.next_state(self.ops[real_action_index])
+        if self.current_state.new_legal_op(op):
+            self.execute_action(op)
+        self.current_state = temp_new_state
+        observation = self.current_state.get_observation()
+        self.current_auto_state.next_state(self.ops[real_action_index], observation)
+        print("tried to do: ", action_tried, ", action taken: ", op)
+        return
+        # else:
+        #     observation = self.current_state.get_observation()
+        #     self.current_auto_state.next_state(self.ops[real_action_index], observation)
+        #     print("tried to do: ", action_tried)
 
     def play_episode(self, event):
         while True:
@@ -193,7 +194,7 @@ class Room(object):
             self.create_image(9, row, col + 1)
 
     def non_move_action(self, row, col, action):
-        if (action == "clean" and self.room[row][col] in [2, 3, 4, 5]) or (action == "pick" and self.room[row][col] == 8):
+        if (action == "clean" and self.room[row][col] in [2, 3, 4, 5, 9]) or (action == "pick" and self.room[row][col] == 8):
             return
         if action in ["clean", "pick"]:
             self.create_image(1, row, col)

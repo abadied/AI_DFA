@@ -91,7 +91,7 @@ class AutomataLearner(object):
         for _key in dfa_dict:
             reward_dict[_key] = {'last_value': False, 's_plus': set(), 's_minus': set()}
 
-        while counter < 50:
+        while counter < 100:
             current_state = copy.deepcopy(initial_state)
             counter += 1
             word = ""
@@ -106,7 +106,7 @@ class AutomataLearner(object):
                 current_action_letter = self.convert_value_to_letter(action)
                 for _key in dfa_dict:
                     reward_dict[_key]['last_value'] = self.check_reward_type(_key, current_state, action)
-                current_state = current_state.next_state(action)
+                current_state, _ = current_state.next_state(action)
                 if current_state.hash not in states_cash_dict.keys():
                     states_cash_dict[current_state.hash] = gf.create_possible_ops_dict(current_state)
                 observation = current_state.get_observation()
@@ -125,8 +125,10 @@ class AutomataLearner(object):
         complete_dfa_dict = {}
         words_dict = {}
         for _key in dfa_dict:
-            s_plus = reward_dict[_key]['s_plus']
-            s_minus = reward_dict[_key]['s_minus']
+            s_plus, s_minus = self.filter_to_shortest_paths(num_of_pos=100, num_of_neg=5000,
+                                                            s_plus=reward_dict[_key]['s_plus'],
+                                                            s_minus=reward_dict[_key]['s_minus'])
+
             new_dfa = DFACreator.create_dfa(s_plus, s_minus)
             # TODO: make addition of sets
             words_dict = {'s_plus': s_plus,
@@ -138,6 +140,21 @@ class AutomataLearner(object):
                                        'accepting_states': DFACreator.get_accepting_states(new_dfa)}
 
         return complete_dfa_dict, words_dict
+
+    def filter_to_shortest_paths(self, num_of_pos, num_of_neg, s_plus, s_minus):
+        """
+
+        :param num_of_pos:
+        :param num_of_neg:
+        :param s_plus:
+        :param s_minus:
+        :return:
+        """
+        s_plus_l = sorted(s_plus, key=lambda x: len(x))
+        s_minus_l = sorted(s_minus, key=lambda x: len(x))
+        max_pos = min(len(s_plus), num_of_pos)
+        max_minus = min(len(s_minus), num_of_neg)
+        return s_plus_l[:max_pos], s_minus_l[:max_minus]
 
     # def learn_dfa(self, initial_state, max_word_length, reward_type):
     #     """computes an automaton from sets of words up to specific length. acception of a word is determined by the function

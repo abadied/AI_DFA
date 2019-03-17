@@ -215,7 +215,7 @@ void gi::BlueFringe::read_samples(const string &path_samples)
         }
     }
 }
-
+// todo: change to other representation of vectors on ints to get more letters for the automata(change in the new file destination
 void gi::BlueFringe::add(const char* line, unsigned int len,
                          int weight, int sign)
 {

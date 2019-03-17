@@ -2,8 +2,8 @@ import random
 import copy
 
 room = []   # do not change here
-room_height = 3  # walls included
-room_width = 6 # walls included
+room_height = 4  # walls included
+room_width = 8 # walls included
 # OPS = ["up", "down", "left", "right", "clean", "pick", "putInBasket", "random", "idle"]
 # OPS = ["up", "down", "left", "right", "clean", "pick", "putInBasket", "idle"]
 OPS = ["up", "down", "left", "right", "clean", "pick", "putInBasket"]
@@ -14,12 +14,12 @@ BASKET_POSITION = [1, 2]    # don't comment for all algorithms. can be changed.
 # the i-j cell in the transition probability matrix indicates the probability to do action j
 # given that the chosen action is i
 # the matrix is ordered according to the order in OPS
-TRAN_PROB_MAT = [[0.8, 0, 0.1, 0.1, 0, 0, 0],
-                 [0, 0.8, 0.1, 0.1, 0, 0, 0],
-                 [0.1, 0.1, 0.8, 0, 0, 0, 0],
-                 [0.1, 0.1, 0, 0.8, 0, 0, 0],
-                 [0, 0, 0, 0, 0.8, 0.2, 0],
-                 [0, 0, 0, 0, 0, 0.8, 0.2],
+TRAN_PROB_MAT = [[0.9, 0, 0, 0.1, 0, 0, 0],
+                 [0, 0.9, 0, 0.1, 0, 0, 0],
+                 [0.1, 0, 0.9, 0, 0, 0, 0],
+                 [0.1, 0, 0, 0.9, 0, 0, 0],
+                 [0, 0, 0, 0, 0.9, 0.1, 0],
+                 [0, 0, 0, 0, 0, 0.9, 0.1],
                  [0, 0, 0, 0, 0, 0, 1]]
 
 
@@ -77,7 +77,7 @@ def scattering_stains():
     #     if room[num1][num2] == 1:
     #         room[num1][num2] = 8
     #         i += 1
-    room[1][3] = 8
+    room[1][4] = 8
     # room[4][3] = 8
 
 
